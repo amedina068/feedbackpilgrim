@@ -7,6 +7,7 @@ import ContactFormCustomFields from '../../resources/js/components/ContactFormCu
 
 const valueInputs = (wrapper) => wrapper.findAll('input[name^="custom_fields["]')
 const addButton = (wrapper) => wrapper.findAll('button').find((button) => button.text() === 'Add Custom Field')
+const removeButtons = (wrapper) => wrapper.findAll('button').filter((button) => button.text() === 'Remove field')
 
 describe('ContactFormCustomFields', () => {
   it('adds a row with a numbered field name for each click', async () => {
@@ -38,11 +39,38 @@ describe('ContactFormCustomFields', () => {
     await addButton(wrapper).trigger('click')
     await addButton(wrapper).trigger('click')
 
-    const removeButtons = wrapper.findAll('button').filter((button) => button.text() === 'Remove field')
-    await removeButtons[1].trigger('click')
+    await removeButtons(wrapper)[1].trigger('click')
 
     expect(valueInputs(wrapper).map((input) => input.attributes('name'))).toEqual([
       'custom_fields[custom_field_1]',
+    ])
+  })
+
+  it('keeps the second row visible when the user removes the first row', async () => {
+    const wrapper = mount(ContactFormCustomFields)
+    await addButton(wrapper).trigger('click')
+    await addButton(wrapper).trigger('click')
+    await wrapper.findAll('input[aria-label="Field name"]')[1].setValue('plan')
+
+    await removeButtons(wrapper)[0].trigger('click')
+
+    expect(wrapper.findAll('input[aria-label="Field name"]').map((input) => input.element.value)).toEqual(['plan'])
+    expect(valueInputs(wrapper).map((input) => input.attributes('name'))).toEqual([
+      'custom_fields[plan]',
+    ])
+  })
+
+  it('gives a new row a field name that no other row uses after a removal', async () => {
+    const wrapper = mount(ContactFormCustomFields)
+    await addButton(wrapper).trigger('click')
+    await addButton(wrapper).trigger('click')
+
+    await removeButtons(wrapper)[0].trigger('click')
+    await addButton(wrapper).trigger('click')
+
+    expect(valueInputs(wrapper).map((input) => input.attributes('name'))).toEqual([
+      'custom_fields[custom_field_2]',
+      'custom_fields[custom_field_3]',
     ])
   })
 })
