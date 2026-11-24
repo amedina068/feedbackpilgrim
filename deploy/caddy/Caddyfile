@@ -1,0 +1,29 @@
+# Feedback Pilgrim on Caddy and PHP-FPM, without Docker.
+#
+# Replace feedback.example.com with APP_DOMAIN, /var/www/feedbackpilgrim with
+# the app folder, and the socket with the socket of your PHP-FPM pool.
+#
+# A wildcard certificate needs a DNS challenge. This file uses the Cloudflare
+# module (github.com/caddy-dns/cloudflare). Build Caddy with the module of
+# your DNS provider, and set its token in the environment of the Caddy service.
+#
+# For the Docker stack, replace root, php_fastcgi and file_server with:
+#   reverse_proxy 127.0.0.1:8080
+# Then set TRUSTED_PROXIES=172.16.0.0/12 in .env.
+
+feedback.example.com, *.feedback.example.com {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+
+	root * /var/www/feedbackpilgrim/public
+	encode zstd gzip
+
+	# The media library accepts files up to 10 MB (config/media-library.php).
+	request_body {
+		max_size 10MB
+	}
+
+	php_fastcgi unix//run/php/php8.3-fpm.sock
+	file_server
+}

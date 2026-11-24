@@ -1,0 +1,115 @@
+# Self-host Feedback Pilgrim with the published Docker image. No build is
+# needed.
+#
+# This file is the same stack as docker-compose.yml, but the app services
+# use the image from the GitHub Container Registry. When you change one
+# file, change the other file too.
+#
+# 1. Put this file and .env.example in an empty folder.
+# 2. Copy .env.example to .env. Set APP_KEY, APP_DOMAIN, APP_URL and
+#    DB_PASSWORD.
+# 3. Run: docker compose -f docker-compose.image.yml up -d
+# 4. Run: docker compose -f docker-compose.image.yml logs web
+#    Open the setup URL in the log and create the owner account.
+#
+# FEEDBACKPILGRIM_VERSION selects the image tag. The default is "latest".
+# Set an exact version, for example FEEDBACKPILGRIM_VERSION=0.1.0, so that
+# an update happens only when you change the value.
+#
+# To update, change FEEDBACKPILGRIM_VERSION (or keep "latest") and run:
+#   docker compose -f docker-compose.image.yml pull
+#   docker compose -f docker-compose.image.yml up -d
+#
+# The web service listens on HTTP port APP_PORT (8080 by default) of
+# 127.0.0.1. Put a reverse proxy with TLS on the host in front of it for
+# APP_DOMAIN and *.APP_DOMAIN. APP_BIND changes the interface.
+
+x-app: &app
+  image: ${FEEDBACKPILGRIM_IMAGE:-ghcr.io/amedina068/feedbackpilgrim}:${FEEDBACKPILGRIM_VERSION:-latest}
+  restart: unless-stopped
+  env_file: .env
+  environment: &app-environment
+    DB_CONNECTION: mysql
+    DB_HOST: mysql
+    DB_PORT: 3306
+    REDIS_HOST: redis
+    REDIS_PORT: 6379
+  volumes:
+    - storage:/var/www/html/storage/app
+
+services:
+  web:
+    <<: *app
+    ports:
+      # The app listens on the loopback interface of the host by default. Put a
+      # reverse proxy on the host in front of it. Set APP_BIND=0.0.0.0 only if
+      # the app must take traffic from other hosts with no proxy.
+      - "${APP_BIND:-127.0.0.1}:${APP_PORT:-8080}:8080"
+    environment:
+      <<: *app-environment
+      # Only this service runs the migrations and the caches at startup.
+      AUTORUN_ENABLED: "true"
+      AUTORUN_LARAVEL_MIGRATION_TIMEOUT: "60"
+      # Create the storage link and print the setup URL at start.
+      FP_PREPARE_ON_START: "true"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  queue:
+    <<: *app
+    command: ["php", "artisan", "queue:work", "--tries=3"]
+    stop_signal: SIGTERM
+    healthcheck:
+      test: ["CMD", "healthcheck-queue"]
+      start_period: 10s
+    depends_on:
+      web:
+        condition: service_healthy
+
+  scheduler:
+    <<: *app
+    command: ["php", "artisan", "schedule:work"]
+    stop_signal: SIGTERM
+    healthcheck:
+      test: ["CMD", "healthcheck-schedule"]
+      start_period: 10s
+    depends_on:
+      web:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-feedbackpilgrim}
+      MYSQL_USER: ${DB_USERNAME:-feedbackpilgrim}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    volumes:
+      - mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u\"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  storage:
+  mysql:
+  redis:

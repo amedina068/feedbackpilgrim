@@ -1,0 +1,1965 @@
+# The OpenAPI spec of Feedback Pilgrim. Edit this file by hand.
+# Then run "composer api-docs" to make public/docs/openapi.json and the
+# Postman files again. CI fails when the generated files do not match.
+openapi: 3.1.0
+info:
+  title: Feedback Pilgrim API
+  version: 1.0.0
+  description: |-
+    The Feedback Pilgrim API gives your code access to the posts, release notes, contacts, testimonials and tags of one client.
+
+    Each Feedback Pilgrim instance is self-hosted. The base URL is the `APP_URL` of your instance, for example `https://app.example.com`.
+
+    ## Keys
+
+    The API uses two keys. Each operation names the key that it needs.
+
+    - **API token** (`apiToken`): a personal access token. Make one in **Settings → API Tokens**. The token belongs to one client. Each request reads and changes only the data of that client. Keep the token on your server.
+    - **Publishable key** (`publishableKey`): the `pk_` key of a client. The widget script `pilgrim.js` sends it to `POST /api/v1/init`. The key is public. It gives no access to the other operations.
+
+    Send the key in the `Authorization: Bearer` header. The API always answers in JSON. Send `Accept: application/json` with each request all the same, because it is the standard for a JSON API.
+
+    ## Rate limits
+
+    Each user can make 120 requests each minute. All the tokens of one user share this limit. Requests without a user, such as widget `init` calls, count against the IP address. Each response has the headers `X-RateLimit-Limit` and `X-RateLimit-Remaining`. After the limit, the API returns `429` with a `Retry-After` header in seconds.
+
+    ## Errors
+
+    An error response is JSON. Each error has a `message` field that says what went wrong. Some authentication errors of the widget and of the token check also have an `error` field, which older clients read. A `422` response also has an `errors` object with the messages for each field.
+
+    ## Pagination
+
+    The list operations take `page` and `per_page` (1 to 100, default 15). The response is a Laravel paginator: `data` holds the records, and `current_page`, `last_page`, `per_page`, `total`, `next_page_url` and the other fields describe the page.
+  contact:
+    name: Feedback Pilgrim
+    url: https://app.example.com/documentation
+servers:
+  - url: '{baseUrl}'
+    description: Your Feedback Pilgrim instance
+    variables:
+      baseUrl:
+        default: https://app.example.com
+        description: The APP_URL of your instance, with no slash at the end.
+security:
+  - apiToken: []
+tags:
+  - name: Init
+    description: Sign in a contact from your server and get a sign-in link for the public site.
+  - name: Widget
+    description: The call that the widget script makes from the browser with the publishable key.
+  - name: Posts
+    description: Feature requests and other feedback from contacts.
+  - name: Release Notes
+    description: Changelog entries.
+  - name: Contacts
+    description: The customers of the client.
+  - name: Testimonials
+    description: Customer testimonials.
+  - name: Tags
+    description: Labels for posts, release notes and contacts.
+paths:
+  /api/public/v1/init:
+    post:
+      tags: [Init]
+      summary: Sign in a contact
+      description: >-
+        Creates or updates the contact with the email of the request and returns a sign-in link for the public site of the client.
+        The link is valid for 24 hours. Send the link only to that contact.
+        Without a contact email, the response body is an empty JSON array (`[]`).
+      operationId: init
+      security:
+        - apiToken: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitRequest'
+            example:
+              contact:
+                name: Jane Doe
+                email: jane@example.com
+                mrr: 99.99
+                ltv: 1200
+                avatar: https://example.com/avatar.jpg
+                plan: premium
+      responses:
+        '200':
+          description: The sign-in link, or an empty JSON array (`[]`) when the request has no contact email.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitResponse'
+              example:
+                auth_url: https://acme.example.com/authenticate/550e8400-e29b-41d4-a716-446655440000?expires=1767225600&signature=0f3a1c9e8b7d6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /api/v1/init:
+    post:
+      tags: [Widget]
+      summary: Start the widget
+      description: >-
+        The widget script `pilgrim.js` calls this operation from the browser. It sends the publishable key of the client, not an API token.
+        The operation finds or creates the contact and returns the URLs of the widget iframes.
+        To prove the email of the contact, your server makes `user_hash`: the HMAC-SHA256 hex digest of the trimmed, lowercase email, with the identity secret of the client as the key.
+        Make the hash on your server only. Never put the identity secret in browser code.
+        A wrong hash returns 403. A missing hash returns 403 when the client requires identity verification.
+        Without a hash, the operation can create a new contact, but it does not update or sign in an existing contact.
+        One IP address can create 20 contacts without a hash for each client each hour. After that, a call that creates a contact without a hash returns 429.
+        The contact fields have limits: `email` must be an email of at most 255 characters, `name` at most 255 characters, `avatar` an http or https URL of at most 2048 characters, and `mrr` and `ltv` numbers from 0.
+        The other fields of the contact are custom fields. They can have at most 50 keys, a depth of 3 and 16 KB, and no key can start with `pilgrim_`.
+      operationId: widgetInit
+      security:
+        - publishableKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WidgetInitRequest'
+            example:
+              contact:
+                name: Jane Doe
+                email: jane@example.com
+              user_hash: 6f1e1c8a0b2d4e3f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f
+              releaseNotes:
+                show: true
+                open: true
+              testimonials:
+                show: true
+      responses:
+        '200':
+          description: The sign-in link and the iframe URLs of the widget.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WidgetInitResponse'
+              example:
+                auth_url: https://acme.example.com/authenticate/550e8400-e29b-41d4-a716-446655440000?expires=1767225600&signature=0f3a1c9e8b7d6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f
+                releaseNotes:
+                  url: https://acme.example.com/iframe/release-notes
+                  show: true
+                  open: false
+                testimonials:
+                  url: https://acme.example.com/iframe/testimonials?contact_token=eyJpdiI6IkV4YW1wbGUifQ%3D%3D
+        '401':
+          description: The publishable key is missing or wrong, or every user of the client is deactivated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: The publishable key is wrong. Copy the pk_ key from Settings > Embed Widget.
+                error: Invalid client key
+        '403':
+          description: The `user_hash` is wrong, or it is missing and the client requires identity verification.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Identity verification failed. Make userHash on your server with the identity secret of this project.
+                error: Identity verification failed
+        '422':
+          description: The request has no contact email, or a contact field is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                message: Send the signed-in user as "contact" with at least an email.
+                errors:
+                  contact:
+                    - Send the signed-in user as "contact" with at least an email.
+        '429':
+          description: >-
+            Too many requests from this IP address, or too many new contacts without a hash from this IP address in the last hour.
+            The `Retry-After` header gives the wait in seconds.
+          headers:
+            Retry-After:
+              $ref: '#/components/headers/RetryAfter'
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/RateLimitLimit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimitRemaining'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Too many new contacts from this address. Try again later.
+  /api/public/v1/posts:
+    get:
+      tags: [Posts]
+      summary: List posts
+      description: Returns the posts of the client, one page at a time. Each post includes its contact, tags and votes.
+      operationId: listPosts
+      security:
+        - apiToken: []
+      parameters:
+        - $ref: '#/components/parameters/Search'
+        - name: status
+          in: query
+          description: Returns only the posts with this status.
+          example: pending
+          schema:
+            type: string
+            enum: [pending, in_progress, completed]
+        - name: board_id
+          in: query
+          description: Returns only the posts on this board.
+          example: 1
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/TagFilter'
+        - name: published
+          in: query
+          description: '`true` returns only published posts. `false` returns only drafts.'
+          example: true
+          schema:
+            type: boolean
+        - name: sort_by
+          in: query
+          description: The field that sets the order.
+          example: created_at
+          schema:
+            type: string
+            enum: [created_at, updated_at, title, status, published_at]
+            default: created_at
+        - $ref: '#/components/parameters/SortDirection'
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: One page of posts.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Pagination'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Post'
+              example:
+                current_page: 1
+                data:
+                  - &post
+                    id: 1
+                    client_id: 1
+                    stage_id: 4
+                    board_id: 1
+                    contact_id: 7
+                    title: Add dark mode
+                    content: Please add a dark theme.
+                    notes: null
+                    status: in_progress
+                    stage_position: null
+                    published_at: null
+                    archived_at: null
+                    created_at: '2026-06-01T09:00:00.000000Z'
+                    updated_at: '2026-06-01T09:00:00.000000Z'
+                    contact: &nested-contact
+                      id: 7
+                      uuid: 6e48ad77-fb51-449f-99d2-9c5cc2d9d0c5
+                      user_id: null
+                      client_id: 1
+                      name: Jane Smith
+                      email: jane@example.com
+                      metadata: '{"plan":"pro"}'
+                      notes: null
+                      avatar: https://app.example.com/storage/avatars/7/avatar.png
+                      mrr: 149.99
+                      ltv: 1800
+                      top_customer: 0
+                      created_at: '2026-06-01T09:00:00.000000Z'
+                      updated_at: '2026-06-01T09:00:00.000000Z'
+                    tags:
+                      - &tag {id: 1, client_id: 1, title: feature, created_at: '2026-06-01T09:00:00.000000Z', updated_at: '2026-06-01T09:00:00.000000Z'}
+                    votes:
+                      - &vote {id: 3, contact_id: 7, votable_type: App\Models\Post, votable_id: 1, created_at: '2026-06-01T09:00:00.000000Z', updated_at: '2026-06-01T09:00:00.000000Z'}
+                first_page_url: https://app.example.com/api/public/v1/posts?page=1
+                from: 1
+                last_page: 1
+                last_page_url: https://app.example.com/api/public/v1/posts?page=1
+                links:
+                  - {url: null, label: '&laquo; Previous', page: null, active: false}
+                  - {url: 'https://app.example.com/api/public/v1/posts?page=1', label: '1', page: 1, active: true}
+                  - {url: null, label: 'Next &raquo;', page: null, active: false}
+                next_page_url: null
+                path: https://app.example.com/api/public/v1/posts
+                per_page: 15
+                prev_page_url: null
+                to: 1
+                total: 1
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    post:
+      tags: [Posts]
+      summary: Create a post
+      description: >-
+        Creates a post for the client. Without `board_id`, the post goes on the first board of the client.
+        The status sets the stage of the post.
+      operationId: createPost
+      security:
+        - apiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostWriteRequired'
+            example:
+              title: Add dark mode
+              content: Please add a dark theme.
+              status: pending
+              tags: [1, 2]
+              board_id: 1
+      responses:
+        '201':
+          description: The new post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+              example:
+                id: 1
+                client_id: 1
+                board_id: 1
+                stage_id: 1
+                title: Add dark mode
+                content: Please add a dark theme.
+                status: pending
+                created_at: '2026-06-01T09:00:00.000000Z'
+                updated_at: '2026-06-01T09:00:00.000000Z'
+                stage: {id: 1, client_id: 1, name: Open, slug: open, color: '#94a3b8', type: open, show_on_roadmap: false, position: 1, created_at: '2026-06-01T09:00:00.000000Z', updated_at: '2026-06-01T09:00:00.000000Z'}
+                tags:
+                  - *tag
+                contact: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /api/public/v1/posts/{post}:
+    parameters:
+      - $ref: '#/components/parameters/PostId'
+    get:
+      tags: [Posts]
+      summary: Get a post
+      description: Returns one post of the client with its contact, tags, votes and comments.
+      operationId: getPost
+      security:
+        - apiToken: []
+      responses:
+        '200':
+          description: The post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+              example:
+                id: 1
+                client_id: 1
+                stage_id: 4
+                board_id: 1
+                contact_id: 7
+                title: Add dark mode
+                content: Please add a dark theme.
+                notes: null
+                status: in_progress
+                stage_position: null
+                published_at: null
+                archived_at: null
+                created_at: '2026-06-01T09:00:00.000000Z'
+                updated_at: '2026-06-01T09:00:00.000000Z'
+                contact: *nested-contact
+                tags:
+                  - *tag
+                votes:
+                  - *vote
+                comments:
+                  - {id: 5, contact_id: 7, commentable_type: App\Models\Post, commentable_id: 1, content: Yes please., hidden_at: null, created_at: '2026-06-01T09:00:00.000000Z', updated_at: '2026-06-01T09:00:00.000000Z'}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    patch:
+      tags: [Posts]
+      summary: Update a post
+      description: >-
+        Changes the fields that the request sends. `tags` replaces all the tags of the post.
+        A change of status moves the post to the first stage of the matching type. Then the app sends the
+        same emails, webhooks and Slack message as a stage change in the dashboard. The API also accepts `PUT` for this operation.
+      operationId: updatePost
+      security:
+        - apiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostWrite'
+            example:
+              status: in_progress
+      responses:
+        '200':
+          description: The updated post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+              example:
+                id: 1
+                client_id: 1
+                stage_id: 4
+                board_id: 1
+                contact_id: 7
+                title: Add dark mode
+                content: Please add a dark theme.
+                notes: null
+                status: in_progress
+                stage_position: null
+                published_at: null
+                archived_at: null
+                created_at: '2026-06-01T09:00:00.000000Z'
+                updated_at: '2026-06-01T09:00:00.000000Z'
+                tags:
+                  - *tag
+                contact: *nested-contact
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    delete:
+      tags: [Posts]
+      summary: Delete a post (not supported)
+      description: The API cannot delete a post. This operation always returns `405`.
+      operationId: deletePost
+      security:
+        - apiToken: []
+      responses:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /api/public/v1/release-notes:
+    get:
+      tags: [Release Notes]
+      summary: List release notes
+      description: Returns the release notes of the client, one page at a time, with their tags, votes and comments.
+      operationId: listReleaseNotes
+      security:
+        - apiToken: []
+      parameters:
+        - $ref: '#/components/parameters/Search'
+        - name: published
+          in: query
+          description: '`true` returns only published release notes. `false` returns only drafts.'
+          example: true
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/TagFilter'
+        - name: sort_by
+          in: query
+          description: The field that sets the order.
+          example: created_at
+          schema:
+            type: string
+            enum: [created_at, updated_at, title, published_at]
+            default: created_at
+        - $ref: '#/components/parameters/SortDirection'
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: One page of release notes.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Pagination'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ReleaseNote'
+              example:
+                current_page: 1
+                data:
+                  - &release-note
+                    id: 1
+                    client_id: 1
+                    user_id: 1
+                    title: Version 2.1.0
+                    content: "## New\n- Dark mode"
+                    slug: version-210-20260601
+                    published_at: null
+                    created_at: '2026-06-01T09:00:00.000000Z'
+                    updated_at: '2026-06-01T09:00:00.000000Z'
+                    tags:
+                      - *tag
+                    votes: []
+                    comments: []
+                first_page_url: https://app.example.com/api/public/v1/release-notes?page=1
+                from: 1
+                last_page: 1
+                last_page_url: https://app.example.com/api/public/v1/release-notes?page=1
+                links:
+                  - {url: null, label: '&laquo; Previous', page: null, active: false}
+                  - {url: 'https://app.example.com/api/public/v1/release-notes?page=1', label: '1', page: 1, active: true}
+                  - {url: null, label: 'Next &raquo;', page: null, active: false}
+                next_page_url: null
+                path: https://app.example.com/api/public/v1/release-notes
+                per_page: 15
+                prev_page_url: null
+                to: 1
+                total: 1
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    post:
+      tags: [Release Notes]
+      summary: Create a release note
+      description: >-
+        Creates a release note. Without `published: true`, the note is a draft. The app makes the `slug` from the title.
+        The API token user becomes the author.
+      operationId: createReleaseNote
+      security:
+        - apiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReleaseNoteWriteRequired'
+            example:
+              title: Version 2.1.0
+              content: |-
+                ## New
+                - Dark mode
+                - Faster pages
+              tags: [1]
+      responses:
+        '201':
+          description: The new release note.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseNote'
+              example:
+                id: 1
+                client_id: 1
+                user_id: 1
+                title: Version 2.1.0
+                content: "## New\n- Dark mode"
+                slug: version-210-20260601
+                published_at: null
+                created_at: '2026-06-01T09:00:00.000000Z'
+                updated_at: '2026-06-01T09:00:00.000000Z'
+                tags:
+                  - *tag
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /api/public/v1/release-notes/{release_note}:
+    parameters:
+      - $ref: '#/components/parameters/ReleaseNoteId'
+    get:
+      tags: [Release Notes]
+      summary: Get a release note
+      description: Returns one release note of the client with its tags, votes and comments.
+      operationId: getReleaseNote
+      security:
+        - apiToken: []
+      responses:
+        '200':
+          description: The release note.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseNote'
+              example: *release-note
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    patch:
+      tags: [Release Notes]
+      summary: Update a release note
+      description: >-
+        Changes the fields that the request sends. `tags` replaces all the tags of the release note.
+        `published: true` keeps a publication date that exists. `published: false` clears it.
+        The API also accepts `PUT` for this operation.
+      operationId: updateReleaseNote
+      security:
+        - apiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReleaseNoteWrite'
+            example:
+              title: Version 2.1.1
+      responses:
+        '200':
+          description: The updated release note.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseNote'
+              example:
+                id: 1
+                client_id: 1
+                user_id: 1
+                title: Version 2.1.1
+                content: "## New\n- Dark mode"
+                slug: version-210-20260601
+                published_at: null
+                created_at: '2026-06-01T09:00:00.000000Z'
+                updated_at: '2026-06-01T09:00:00.000000Z'
+                tags:
+                  - *tag
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    delete:
+      tags: [Release Notes]
+      summary: Delete a release note (not supported)
+      description: The API cannot delete a release note. This operation always returns `405`.
+      operationId: deleteReleaseNote
+      security:
+        - apiToken: []
+      responses:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /api/public/v1/contacts:
+    get:
+      tags: [Contacts]
+      summary: List contacts
+      description: Returns the contacts of the client, one page at a time, with their tags and votes.
+      operationId: listContacts
+      security:
+        - apiToken: []
+      parameters:
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/TagFilter'
+        - name: sort_by
+          in: query
+          description: The field that sets the order.
+          example: created_at
+          schema:
+            type: string
+            enum: [created_at, updated_at, name, email, mrr, ltv]
+            default: created_at
+        - $ref: '#/components/parameters/SortDirection'
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: One page of contacts.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Pagination'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Contact'
+              example:
+                current_page: 1
+                data:
+                  - &contact
+                    id: 7
+                    uuid: 6e48ad77-fb51-449f-99d2-9c5cc2d9d0c5
+                    user_id: null
+                    client_id: 1
+                    name: Jane Smith
+                    email: jane@example.com
+                    notes: null
+                    avatar: https://app.example.com/storage/avatars/7/avatar.png
+                    mrr: 149.99
+                    ltv: 1800
+                    top_customer: 0
+                    created_at: '2026-06-01T09:00:00.000000Z'
+                    updated_at: '2026-06-01T09:00:00.000000Z'
+                    plan: pro
+                    tags:
+                      - *tag
+                    votes:
+                      - *vote
+                first_page_url: https://app.example.com/api/public/v1/contacts?page=1
+                from: 1
+                last_page: 1
+                last_page_url: https://app.example.com/api/public/v1/contacts?page=1
+                links:
+                  - {url: null, label: '&laquo; Previous', page: null, active: false}
+                  - {url: 'https://app.example.com/api/public/v1/contacts?page=1', label: '1', page: 1, active: true}
+                  - {url: null, label: 'Next &raquo;', page: null, active: false}
+                next_page_url: null
+                path: https://app.example.com/api/public/v1/contacts
+                per_page: 15
+                prev_page_url: null
+                to: 1
+                total: 1
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    post:
+      tags: [Contacts]
+      summary: Create or update a contact
+      description: >-
+        Creates a contact and returns `201`. If the client already has a contact with this email, the operation updates that contact and returns `200`.
+        The app stores each field that the schema does not name as custom metadata, and returns it as a field of the contact.
+      operationId: createContact
+      security:
+        - apiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactWriteRequired'
+            example:
+              name: Jane Smith
+              email: jane@example.com
+              mrr: 149.99
+              ltv: 1800
+              avatar: https://example.com/jane.jpg
+              tags: [1, 2]
+              plan: pro
+      responses:
+        '200':
+          description: The existing contact, updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+              example:
+                id: 7
+                uuid: 6e48ad77-fb51-449f-99d2-9c5cc2d9d0c5
+                user_id: null
+                client_id: 1
+                name: Jane Smith
+                email: jane@example.com
+                notes: null
+                avatar: https://app.example.com/storage/avatars/7/avatar.png
+                mrr: 149.99
+                ltv: 1800
+                top_customer: 0
+                created_at: '2026-06-01T09:00:00.000000Z'
+                updated_at: '2026-06-01T09:00:00.000000Z'
+                plan: pro
+                tags:
+                  - *tag
+        '201':
+          description: The new contact.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+              example:
+                id: 7
+                uuid: 6e48ad77-fb51-449f-99d2-9c5cc2d9d0c5
+                user_id: null
+                client_id: 1
+                name: Jane Smith
+                email: jane@example.com
+                notes: null
+                avatar: https://app.example.com/storage/avatars/7/avatar.png
+                mrr: 149.99
+                ltv: 1800
+                top_customer: 0
+                created_at: '2026-06-01T09:00:00.000000Z'
+                updated_at: '2026-06-01T09:00:00.000000Z'
+                plan: pro
+                tags:
+                  - *tag
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /api/public/v1/contacts/{contact}:
+    parameters:
+      - $ref: '#/components/parameters/ContactId'
+    get:
+      tags: [Contacts]
+      summary: Get a contact
+      description: Returns one contact of the client with its tags and votes.
+      operationId: getContact
+      security:
+        - apiToken: []
+      responses:
+        '200':
+          description: The contact.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+              example: *contact
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    patch:
+      tags: [Contacts]
+      summary: Update a contact
+      description: >-
+        Changes the fields that the request sends. The email must be unique in the client. `tags` replaces all the tags of the contact.
+        This operation does not change the custom fields. To change them, send `POST /api/public/v1/contacts` with the email of the contact.
+        The API also accepts `PUT` for this operation.
+      operationId: updateContact
+      security:
+        - apiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactWrite'
+            example:
+              name: Jane S.
+              mrr: 199
+      responses:
+        '200':
+          description: The updated contact.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+              example:
+                id: 7
+                uuid: 6e48ad77-fb51-449f-99d2-9c5cc2d9d0c5
+                user_id: null
+                client_id: 1
+                name: Jane Smith
+                email: jane@example.com
+                notes: null
+                avatar: https://app.example.com/storage/avatars/7/avatar.png
+                mrr: 199
+                ltv: 1800
+                top_customer: 0
+                created_at: '2026-06-01T09:00:00.000000Z'
+                updated_at: '2026-06-01T09:00:00.000000Z'
+                plan: pro
+                tags:
+                  - *tag
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /api/public/v1/testimonials:
+    get:
+      tags: [Testimonials]
+      summary: List testimonials
+      description: >-
+        Returns the testimonials of the client, one page at a time, with their contact, votes and comments.
+        Without `approved`, the list has only the pending testimonials.
+      operationId: listTestimonials
+      security:
+        - apiToken: []
+      parameters:
+        - $ref: '#/components/parameters/Search'
+        - name: approved
+          in: query
+          description: >-
+            `true` returns only approved testimonials. `false` returns only pending testimonials.
+            Without the parameter, the list has only the pending testimonials.
+          example: true
+          schema:
+            type: boolean
+        - name: rating
+          in: query
+          description: Returns only the testimonials with this rating.
+          example: 5
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+        - name: sort_by
+          in: query
+          description: The field that sets the order.
+          example: created_at
+          schema:
+            type: string
+            enum: [created_at, updated_at, rating, approved_at]
+            default: created_at
+        - $ref: '#/components/parameters/SortDirection'
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: One page of testimonials.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Pagination'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Testimonial'
+              example:
+                current_page: 1
+                data:
+                  - &testimonial
+                    id: 1
+                    client_id: 1
+                    contact_id: 7
+                    title: null
+                    description: The roadmap keeps our customers in the loop.
+                    rating: 5
+                    avatar_image: https://app.example.com/storage/avatars/7/avatar.png
+                    username: jane_doe
+                    subtitle: null
+                    approved_at: null
+                    created_at: '2026-06-01T09:00:00.000000Z'
+                    updated_at: '2026-06-01T09:00:00.000000Z'
+                    contact: *nested-contact
+                    votes: []
+                    comments: []
+                first_page_url: https://app.example.com/api/public/v1/testimonials?page=1
+                from: 1
+                last_page: 1
+                last_page_url: https://app.example.com/api/public/v1/testimonials?page=1
+                links:
+                  - {url: null, label: '&laquo; Previous', page: null, active: false}
+                  - {url: 'https://app.example.com/api/public/v1/testimonials?page=1', label: '1', page: 1, active: true}
+                  - {url: null, label: 'Next &raquo;', page: null, active: false}
+                next_page_url: null
+                path: https://app.example.com/api/public/v1/testimonials
+                per_page: 15
+                prev_page_url: null
+                to: 1
+                total: 1
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    post:
+      tags: [Testimonials]
+      summary: Create a testimonial
+      description: Creates a pending testimonial for the client. To link it to a contact, send `contact_id`.
+      operationId: createTestimonial
+      security:
+        - apiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestimonialWriteRequired'
+            example:
+              description: The roadmap keeps our customers in the loop.
+              rating: 5
+              username: jane_doe
+              contact_id: 42
+      responses:
+        '201':
+          description: The new testimonial.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Testimonial'
+              example:
+                id: 1
+                client_id: 1
+                contact_id: 7
+                title: null
+                description: The roadmap keeps our customers in the loop.
+                rating: 5
+                avatar_image: https://app.example.com/storage/avatars/7/avatar.png
+                username: jane_doe
+                subtitle: null
+                approved_at: null
+                created_at: '2026-06-01T09:00:00.000000Z'
+                updated_at: '2026-06-01T09:00:00.000000Z'
+                contact: *nested-contact
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /api/public/v1/testimonials/{testimonial}:
+    parameters:
+      - $ref: '#/components/parameters/TestimonialId'
+    get:
+      tags: [Testimonials]
+      summary: Get a testimonial
+      description: Returns one testimonial of the client with its contact, votes and comments.
+      operationId: getTestimonial
+      security:
+        - apiToken: []
+      responses:
+        '200':
+          description: The testimonial.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Testimonial'
+              example: *testimonial
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    patch:
+      tags: [Testimonials]
+      summary: Update a testimonial
+      description: >-
+        Changes the fields that the request sends. To approve the testimonial, set `approved_at`.
+        The API also accepts `PUT` for this operation.
+      operationId: updateTestimonial
+      security:
+        - apiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestimonialWrite'
+            example:
+              approved_at: '2026-06-15T10:00:00Z'
+      responses:
+        '200':
+          description: The updated testimonial.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Testimonial'
+              example:
+                id: 1
+                client_id: 1
+                contact_id: 7
+                title: null
+                description: The roadmap keeps our customers in the loop.
+                rating: 5
+                avatar_image: https://app.example.com/storage/avatars/7/avatar.png
+                username: jane_doe
+                subtitle: null
+                approved_at: '2026-06-15T10:00:00.000000Z'
+                created_at: '2026-06-01T09:00:00.000000Z'
+                updated_at: '2026-06-01T09:00:00.000000Z'
+                contact: *nested-contact
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    delete:
+      tags: [Testimonials]
+      summary: Delete a testimonial (not supported)
+      description: The API cannot delete a testimonial. This operation always returns `405`.
+      operationId: deleteTestimonial
+      security:
+        - apiToken: []
+      responses:
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /api/public/v1/tags:
+    get:
+      tags: [Tags]
+      summary: List tags
+      description: Returns the tags of the client, one page at a time, with `posts_count` and `contacts_count`.
+      operationId: listTags
+      security:
+        - apiToken: []
+      parameters:
+        - $ref: '#/components/parameters/Search'
+        - name: sort_by
+          in: query
+          description: The field that sets the order.
+          example: created_at
+          schema:
+            type: string
+            enum: [title, created_at, updated_at]
+            default: title
+        - name: sort_direction
+          in: query
+          description: The direction of the order.
+          example: asc
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: One page of tags.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Pagination'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Tag'
+              example:
+                current_page: 1
+                data:
+                  - {id: 1, client_id: 1, title: feature, created_at: '2026-06-01T09:00:00.000000Z', updated_at: '2026-06-01T09:00:00.000000Z', posts_count: 4, contacts_count: 2}
+                first_page_url: https://app.example.com/api/public/v1/tags?page=1
+                from: 1
+                last_page: 1
+                last_page_url: https://app.example.com/api/public/v1/tags?page=1
+                links:
+                  - {url: null, label: '&laquo; Previous', page: null, active: false}
+                  - {url: 'https://app.example.com/api/public/v1/tags?page=1', label: '1', page: 1, active: true}
+                  - {url: null, label: 'Next &raquo;', page: null, active: false}
+                next_page_url: null
+                path: https://app.example.com/api/public/v1/tags
+                per_page: 15
+                prev_page_url: null
+                to: 1
+                total: 1
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    post:
+      tags: [Tags]
+      summary: Create a tag
+      description: Creates a tag. The title must be unique in the client.
+      operationId: createTag
+      security:
+        - apiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagWrite'
+            example:
+              title: feature
+      responses:
+        '201':
+          description: The new tag.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+              example: *tag
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+  /api/public/v1/tags/{tag}:
+    parameters:
+      - $ref: '#/components/parameters/TagId'
+    patch:
+      tags: [Tags]
+      summary: Update a tag
+      description: Changes the title of a tag. The title must be unique in the client. The API also accepts `PUT` for this operation.
+      operationId: updateTag
+      security:
+        - apiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagWrite'
+            example:
+              title: enhancement
+      responses:
+        '200':
+          description: The updated tag.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+              example: {id: 1, client_id: 1, title: enhancement, created_at: '2026-06-01T09:00:00.000000Z', updated_at: '2026-06-01T09:00:00.000000Z'}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    delete:
+      tags: [Tags]
+      summary: Delete a tag
+      description: Removes the tag from each post, release note and contact, and then deletes the tag.
+      operationId: deleteTag
+      security:
+        - apiToken: []
+      responses:
+        '204':
+          description: The tag is deleted. The response has no body.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+components:
+  securitySchemes:
+    apiToken:
+      type: http
+      scheme: bearer
+      description: >-
+        A personal access token (Laravel Sanctum). Make one in Settings → API Tokens.
+        The token belongs to one client and does not expire. Keep it on your server.
+    publishableKey:
+      type: http
+      scheme: bearer
+      description: >-
+        The publishable key of a client: `pk_` and 32 letters and digits. Find it in Settings → Embed Widget.
+        The key is public. Only `POST /api/v1/init` accepts it.
+  parameters:
+    Search:
+      name: search
+      in: query
+      description: Returns only the records that contain this text.
+      example: dark mode
+      schema:
+        type: string
+    TagFilter:
+      name: tag
+      in: query
+      description: Returns only the records with a tag that has this exact title.
+      example: feature
+      schema:
+        type: string
+    SortDirection:
+      name: sort_direction
+      in: query
+      description: The direction of the order.
+      example: desc
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: desc
+    PerPage:
+      name: per_page
+      in: query
+      description: The number of records on each page. The API uses 100 for a larger value.
+      example: 15
+      schema:
+        type: integer
+        default: 15
+        minimum: 1
+        maximum: 100
+    Page:
+      name: page
+      in: query
+      description: The page number.
+      example: 1
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+    PostId:
+      name: post
+      in: path
+      required: true
+      description: The ID of the post.
+      example: 1
+      schema:
+        type: integer
+    ReleaseNoteId:
+      name: release_note
+      in: path
+      required: true
+      description: The ID of the release note.
+      example: 1
+      schema:
+        type: integer
+    ContactId:
+      name: contact
+      in: path
+      required: true
+      description: The ID of the contact.
+      example: 1
+      schema:
+        type: integer
+    TestimonialId:
+      name: testimonial
+      in: path
+      required: true
+      description: The ID of the testimonial.
+      example: 1
+      schema:
+        type: integer
+    TagId:
+      name: tag
+      in: path
+      required: true
+      description: The ID of the tag.
+      example: 1
+      schema:
+        type: integer
+  headers:
+    RetryAfter:
+      description: The number of seconds to wait before the next request.
+      example: 60
+      schema:
+        type: integer
+    RateLimitLimit:
+      description: The number of requests that the user can make each minute.
+      example: 120
+      schema:
+        type: integer
+    RateLimitRemaining:
+      description: The number of requests that are left in this minute.
+      example: 0
+      schema:
+        type: integer
+  responses:
+    Unauthorized:
+      description: >-
+        The API token is missing or wrong, the user is deactivated, or the user is no longer a member of the client of the token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: 'Unauthenticated. Send a valid API token in the Authorization header: "Bearer <token>".'
+    NotFound:
+      description: The client of the token has no record with this ID.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: No post with ID 999 exists for the client of this token.
+    MethodNotAllowed:
+      description: The API does not support this operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Method not allowed
+    ValidationError:
+      description: The request failed validation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+          example:
+            message: The title field is required.
+            errors:
+              title:
+                - The title field is required.
+    TooManyRequests:
+      description: The user or the IP address made more than 120 requests in one minute.
+      headers:
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/RateLimitLimit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimitRemaining'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Too Many Attempts.
+  schemas:
+    Error:
+      type: object
+      description: An error. Each error has `message`. Some authentication errors also have `error`.
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: What went wrong, and how to correct it when the API knows.
+        error:
+          type: string
+          description: A short code-like text for older clients. Read `message` instead.
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The first error.
+        errors:
+          type: object
+          description: The error messages for each field.
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    Pagination:
+      type: object
+      description: A Laravel paginator.
+      properties:
+        current_page:
+          type: integer
+        data:
+          type: array
+          items: {}
+        first_page_url:
+          type: string
+        from:
+          type: [integer, 'null']
+        last_page:
+          type: integer
+        last_page_url:
+          type: string
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              url:
+                type: [string, 'null']
+              label:
+                type: string
+              page:
+                type: [integer, 'null']
+              active:
+                type: boolean
+        next_page_url:
+          type: [string, 'null']
+        path:
+          type: string
+        per_page:
+          type: integer
+        prev_page_url:
+          type: [string, 'null']
+        to:
+          type: [integer, 'null']
+        total:
+          type: integer
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+        client_id:
+          type: integer
+        title:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        posts_count:
+          type: integer
+          description: Only in the list response.
+        contacts_count:
+          type: integer
+          description: Only in the list response.
+    TagWrite:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          description: Unique in the client.
+    Stage:
+      type: object
+      description: A column of the post pipeline.
+      properties:
+        id:
+          type: integer
+        client_id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        color:
+          type: string
+        type:
+          type: string
+          enum: [open, planned, active, complete, closed]
+        show_on_roadmap:
+          type: boolean
+        position:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Vote:
+      type: object
+      description: A vote of a contact on a post, release note or testimonial.
+      additionalProperties: true
+      properties:
+        id:
+          type: integer
+        contact_id:
+          type: [integer, 'null']
+    Comment:
+      type: object
+      description: A comment on a post, release note or testimonial.
+      additionalProperties: true
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+        client_id:
+          type: integer
+        stage_id:
+          type: [integer, 'null']
+        board_id:
+          type: [integer, 'null']
+        contact_id:
+          type: [integer, 'null']
+        title:
+          type: string
+        content:
+          type: [string, 'null']
+        notes:
+          type: [string, 'null']
+        status:
+          type: [string, 'null']
+          enum: [pending, in_progress, completed, null]
+          description: The stage of the post sets this value.
+        stage_position:
+          type: [integer, 'null']
+        published_at:
+          type: [string, 'null']
+          format: date-time
+        archived_at:
+          type: [string, 'null']
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        contact:
+          oneOf:
+            - $ref: '#/components/schemas/Contact'
+            - type: 'null'
+        stage:
+          $ref: '#/components/schemas/Stage'
+          description: Only in the create response and in some update responses.
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        votes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vote'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+          description: Only in the response for one post.
+    PostWrite:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        content:
+          type: string
+        status:
+          type: string
+          enum: [pending, in_progress, completed]
+        board_id:
+          type: integer
+          description: The ID of a board of the client. The default is the first board of the client.
+        tags:
+          type: array
+          items:
+            type: integer
+          description: The IDs of tags of the client.
+    PostWriteRequired:
+      allOf:
+        - $ref: '#/components/schemas/PostWrite'
+        - type: object
+          required: [title, content]
+    ReleaseNote:
+      type: object
+      properties:
+        id:
+          type: integer
+        client_id:
+          type: integer
+        user_id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        slug:
+          type: string
+        published_at:
+          type: [string, 'null']
+          format: date-time
+          description: The publication date. `null` means that the note is a draft. Only published notes show on the public site and in the widget.
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        votes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vote'
+          description: Only in the list response and in the response for one release note.
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+          description: Only in the list response and in the response for one release note.
+    ReleaseNoteWrite:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        content:
+          type: string
+          description: Markdown.
+        published:
+          type: boolean
+          description: '`true` publishes the note. If the note has no `published_at`, it gets the current time. `false` clears `published_at`, and the note becomes a draft.'
+          example: true
+        tags:
+          type: array
+          items:
+            type: integer
+          description: The IDs of tags of the client.
+    ReleaseNoteWriteRequired:
+      allOf:
+        - $ref: '#/components/schemas/ReleaseNoteWrite'
+        - type: object
+          required: [title, content]
+    Contact:
+      type: object
+      description: A contact. Each custom metadata field is a field of this object, next to the fields below.
+      additionalProperties: true
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+        user_id:
+          type: [integer, 'null']
+          description: Set when the contact is the admin contact of a user.
+        client_id:
+          type: integer
+        name:
+          type: [string, 'null']
+        email:
+          type: [string, 'null']
+          format: email
+        notes:
+          type: [string, 'null']
+        avatar:
+          type: [string, 'null']
+        mrr:
+          type: [number, 'null']
+          description: Monthly recurring revenue.
+        ltv:
+          type: [number, 'null']
+          description: Lifetime value.
+        top_customer:
+          type: integer
+          enum: [0, 1]
+        metadata:
+          type: [string, 'null']
+          description: >-
+            The custom fields as a JSON string. Only in a contact inside another record, such as the contact of a post.
+            A contact from the Contacts operations has each custom field as a field of the object.
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        votes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vote'
+          description: Only in the list response and in the response for one contact.
+    ContactWrite:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        avatar:
+          type: string
+          format: uri
+        mrr:
+          type: number
+        ltv:
+          type: number
+        tags:
+          type: array
+          items:
+            type: integer
+          description: The IDs of tags of the client.
+    ContactWriteRequired:
+      description: >-
+        The app stores `metadata` and each field that this schema does not name as custom fields of the contact.
+        For an existing contact, the app merges the new custom fields with the old ones.
+        The custom fields can have 50 keys, 3 levels and 16 KB at most. A key cannot start with `pilgrim_`.
+      allOf:
+        - $ref: '#/components/schemas/ContactWrite'
+        - type: object
+          required: [name, email]
+          additionalProperties: true
+          properties:
+            metadata:
+              type: object
+              additionalProperties: true
+              description: Custom fields of the contact.
+    Testimonial:
+      type: object
+      properties:
+        id:
+          type: integer
+        client_id:
+          type: integer
+        contact_id:
+          type: [integer, 'null']
+        title:
+          type: [string, 'null']
+        description:
+          type: string
+        rating:
+          type: [integer, 'null']
+          minimum: 1
+          maximum: 5
+        avatar_image:
+          type: [string, 'null']
+        username:
+          type: [string, 'null']
+        subtitle:
+          type: [string, 'null']
+        approved_at:
+          type: [string, 'null']
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        contact:
+          oneOf:
+            - $ref: '#/components/schemas/Contact'
+            - type: 'null'
+        votes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vote'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+    TestimonialWrite:
+      type: object
+      properties:
+        description:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        username:
+          type: string
+          maxLength: 255
+        approved_at:
+          type: string
+          format: date-time
+          description: Set this field to approve the testimonial.
+    TestimonialWriteRequired:
+      type: object
+      required: [description, username]
+      properties:
+        description:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        username:
+          type: string
+          maxLength: 255
+        contact_id:
+          type: integer
+          description: The ID of a contact of the client.
+    InitRequest:
+      type: object
+      properties:
+        contact:
+          $ref: '#/components/schemas/InitContact'
+    InitContact:
+      type: object
+      additionalProperties: true
+      description: >-
+        The signed-in user of your app. `email` is necessary to find or create the contact.
+        The app stores each field that this schema does not name as custom metadata.
+        The app also accepts the same object one level down, in `contact.contact`.
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        mrr:
+          type: number
+        ltv:
+          type: number
+        avatar:
+          type: string
+          format: uri
+    InitResponse:
+      description: The sign-in link. Without a contact email, the body is an empty JSON array (`[]`).
+      oneOf:
+        - type: object
+          required: [auth_url]
+          properties:
+            auth_url:
+              type: string
+              format: uri
+              description: The sign-in link of the contact. Valid for 24 hours.
+        - type: array
+          maxItems: 0
+    WidgetInitRequest:
+      type: object
+      required: [contact]
+      properties:
+        contact:
+          allOf:
+            - $ref: '#/components/schemas/InitContact'
+            - type: object
+              required: [email]
+        user_hash:
+          type: string
+          description: >-
+            The HMAC-SHA256 hex digest of the trimmed, lowercase email, with the identity secret of the client as the key.
+            Make it on your server.
+        releaseNotes:
+          type: object
+          description: The release notes widget.
+          required: [show]
+          properties:
+            show:
+              type: boolean
+              description: Return the URL of the release notes iframe.
+            open:
+              type: boolean
+              description: Open the release notes when a new release note exists.
+        testimonials:
+          type: object
+          description: The testimonials widget. Send any object that is not empty to get the iframe URL.
+          additionalProperties: true
+    WidgetInitResponse:
+      type: object
+      properties:
+        auth_url:
+          type: string
+          format: uri
+          description: >-
+            The sign-in link of the contact, valid for 24 hours.
+            Without a verified contact, or for an admin contact, it is the URL of the public board.
+        releaseNotes:
+          type: [object, array]
+          description: An empty JSON array (`[]`) when the request has no `releaseNotes`.
+          properties:
+            url:
+              type: string
+              format: uri
+            show:
+              type: boolean
+            open:
+              type: boolean
+        testimonials:
+          type: [object, array]
+          description: An empty JSON array (`[]`) when the request has no `testimonials`.
+          properties:
+            url:
+              type: string
+              format: uri
+              description: The URL of the testimonials iframe. For a known contact, it carries a contact token that is valid for 24 hours.

@@ -1,0 +1,13 @@
+# Larastan (PHPStan with the Laravel extension). Run it with `composer analyse`.
+# Level 6 also finds missing parameter, return and generic types. CLAUDE.md
+# requires these types, so new code must pass without a baseline entry.
+# phpstan-baseline.neon holds the errors of the code that existed before
+# Larastan. Do not add new errors to it. Fix the code instead.
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    level: 6
+    paths:
+        - app/

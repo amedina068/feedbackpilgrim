@@ -1,0 +1,30 @@
+# The Feedback Pilgrim queue worker.
+#
+# Install:
+#   sudo cp feedbackpilgrim-queue.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now feedbackpilgrim-queue
+#
+# After each deploy, run "php artisan queue:restart". The worker stops after
+# its current job, and systemd starts it again with the new code.
+
+[Unit]
+Description=Feedback Pilgrim queue worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/feedbackpilgrim
+ExecStart=/usr/bin/php artisan queue:work --tries=3
+Restart=always
+RestartSec=5
+# A job has 60 seconds (the default --timeout of queue:work). Give the
+# current job the time to finish before systemd kills the worker.
+KillSignal=SIGTERM
+TimeoutStopSec=70
+
+[Install]
+WantedBy=multi-user.target

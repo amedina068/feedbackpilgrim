@@ -1,0 +1,27 @@
+# The Feedback Pilgrim scheduler. It runs the tasks of routes/console.php.
+#
+# Install:
+#   sudo cp feedbackpilgrim-scheduler.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now feedbackpilgrim-scheduler
+#
+# Use this service or the cron entry of the docs, not both.
+
+[Unit]
+Description=Feedback Pilgrim scheduler
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/feedbackpilgrim
+ExecStart=/usr/bin/php artisan schedule:work
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=70
+
+[Install]
+WantedBy=multi-user.target

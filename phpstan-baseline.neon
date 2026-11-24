@@ -1,0 +1,2575 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method App\\Actions\\Contacts\\ListContacts\:\:__invoke\(\) return type with generic class Illuminate\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Actions/Contacts/ListContacts.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contact_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Posts/CreatePostComment.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notify\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Actions/Posts/CreatePostComment.php
+
+		-
+			message: '#^Method App\\Actions\\Posts\\CreatePostComment\:\:__invoke\(\) should return App\\Models\\Comment but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Actions/Posts/CreatePostComment.php
+
+		-
+			message: '#^Method App\\Actions\\Posts\\CreatePostComment\:\:logActivity\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Actions/Posts/CreatePostComment.php
+
+		-
+			message: '#^Method App\\Actions\\Posts\\CreatePostComment\:\:logActivity\(\) has parameter \$causer with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Actions/Posts/CreatePostComment.php
+
+		-
+			message: '#^Method App\\Actions\\Posts\\CreatePostComment\:\:logActivity\(\) has parameter \$clientId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Actions/Posts/CreatePostComment.php
+
+		-
+			message: '#^Method App\\Actions\\Posts\\CreatePostComment\:\:logActivity\(\) has parameter \$log with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Actions/Posts/CreatePostComment.php
+
+		-
+			message: '#^Method App\\Actions\\Posts\\CreatePostComment\:\:logActivity\(\) has parameter \$subject with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Actions/Posts/CreatePostComment.php
+
+		-
+			message: '#^Parameter \#2 \$comment of class App\\Notifications\\PostCommented constructor expects App\\Models\\Comment, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Actions/Posts/CreatePostComment.php
+
+		-
+			message: '#^Method App\\Actions\\Posts\\ListPosts\:\:__invoke\(\) return type with generic class Illuminate\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Actions/Posts/ListPosts.php
+
+		-
+			message: '#^Method App\\Actions\\ReleaseNotes\\ListReleaseNotes\:\:__invoke\(\) return type with generic class Illuminate\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Actions/ReleaseNotes/ListReleaseNotes.php
+
+		-
+			message: '#^Method App\\Actions\\Tags\\ListTags\:\:__invoke\(\) return type with generic class Illuminate\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Actions/Tags/ListTags.php
+
+		-
+			message: '#^Method App\\Actions\\Testimonials\\ImportTestimonials\:\:existingKeys\(\) should return array\<string, true\> but returns array\<string, bool\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Actions/Testimonials/ImportTestimonials.php
+
+		-
+			message: '#^Method App\\Actions\\Testimonials\\ListTestimonials\:\:__invoke\(\) return type with generic class Illuminate\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Actions/Testimonials/ListTestimonials.php
+
+		-
+			message: '#^Method App\\Auth\\ActiveUserProvider\:\:retrieveById\(\) should return \(Illuminate\\Contracts\\Auth\\Authenticatable&Illuminate\\Database\\Eloquent\\Model\)\|null but returns Illuminate\\Contracts\\Auth\\Authenticatable\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Auth/ActiveUserProvider.php
+
+		-
+			message: '#^Method App\\Auth\\ActiveUserProvider\:\:retrieveByToken\(\) should return \(Illuminate\\Contracts\\Auth\\Authenticatable&Illuminate\\Database\\Eloquent\\Model\)\|null but returns Illuminate\\Contracts\\Auth\\Authenticatable\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Auth/ActiveUserProvider.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\GenerateWeeklyReports\:\:generateForAllClients\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Console/Commands/GenerateWeeklyReports.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\GenerateWeeklyReports\:\:handle\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Console/Commands/GenerateWeeklyReports.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\GenerateWeeklyReports\:\:sendEmailNotifications\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Console/Commands/GenerateWeeklyReports.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model&object\{pivot\: Illuminate\\Database\\Eloquent\\Relations\\Pivot\}\:\:\$public_site\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/InstallCommand.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:testimonialRating\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Console/Commands/SetupTestimonialRatingSettings.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\SetupTestimonialRatingSettings\:\:handle\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Console/Commands/SetupTestimonialRatingSettings.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\InitController\:\:handleReleaseNotes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/Api/InitController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\InitController\:\:handleTestimonials\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/Api/InitController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\InitController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Api/InitController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\ReleaseNoteController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Api/ReleaseNoteController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Http/Controllers/Api/ReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\TestimonialSettingController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Api/TestimonialSettingController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Public\\ContactController\:\:show\(\) has parameter \$contactId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/Api/V1/Public/ContactController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Public\\ContactController\:\:update\(\) has parameter \$contactId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/Api/V1/Public/ContactController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Public\\InitController\:\:handleReleaseNotes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/Api/V1/Public/InitController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Public\\InitController\:\:handleTestimonials\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/Api/V1/Public/InitController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Public\\PostController\:\:destroy\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/Api/V1/Public/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Public\\PostController\:\:show\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/Api/V1/Public/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Public\\PostController\:\:update\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/Api/V1/Public/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Public\\ReleaseNoteController\:\:destroy\(\) has parameter \$releaseNoteId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/Api/V1/Public/ReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Public\\ReleaseNoteController\:\:show\(\) has parameter \$releaseNoteId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/Api/V1/Public/ReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Public\\ReleaseNoteController\:\:update\(\) has parameter \$releaseNoteId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/Api/V1/Public/ReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Public\\TestimonialController\:\:destroy\(\) has parameter \$testimonialId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/Api/V1/Public/TestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Public\\TestimonialController\:\:show\(\) has parameter \$testimonialId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/Api/V1/Public/TestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\V1\\Public\\TestimonialController\:\:update\(\) has parameter \$testimonialId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/Api/V1/Public/TestimonialController.php
+
+		-
+			message: '#^Parameter \#1 \$user of class Illuminate\\Auth\\Events\\Verified constructor expects Illuminate\\Contracts\\Auth\\MustVerifyEmail, App\\Models\\Contact\|App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Auth/VerifyEmailController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notify\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Http/Controllers/ClientCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientCommentController\:\:logActivity\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientCommentController\:\:logActivity\(\) has parameter \$causer with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientCommentController\:\:logActivity\(\) has parameter \$clientId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientCommentController\:\:logActivity\(\) has parameter \$log with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientCommentController\:\:logActivity\(\) has parameter \$subject with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientCommentController\:\:notifyUser\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientCommentController\:\:notifyUser\(\) has parameter \$comment with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientCommentController\:\:notifyUser\(\) has parameter \$model with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientCommentController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientCommentController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:domain\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/ClientController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientHomeController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientHomeController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model&object\{pivot\: Illuminate\\Database\\Eloquent\\Relations\\Pivot\}\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model&object\{pivot\: Illuminate\\Database\\Eloquent\\Relations\\Pivot\}\:\:notify\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostController\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostController\:\:logActivity\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostController\:\:logActivity\(\) has parameter \$causer with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostController\:\:logActivity\(\) has parameter \$clientId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostController\:\:logActivity\(\) has parameter \$log with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostController\:\:logActivity\(\) has parameter \$subject with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostController\:\:notifyUser\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostController\:\:notifyUser\(\) has parameter \$post with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostController\:\:show\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientPostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostVoteController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientPostVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostVoteController\:\:destroy\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientPostVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostVoteController\:\:destroy\(\) has parameter \$voteId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientPostVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostVoteController\:\:logActivity\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientPostVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostVoteController\:\:logActivity\(\) has parameter \$causer with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientPostVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostVoteController\:\:logActivity\(\) has parameter \$clientId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientPostVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostVoteController\:\:logActivity\(\) has parameter \$log with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientPostVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostVoteController\:\:logActivity\(\) has parameter \$subject with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientPostVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostVoteController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientPostVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientPostVoteController\:\:store\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientPostVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientReleaseNoteController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientReleaseNoteController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientReleaseNoteController\:\:show\(\) has parameter \$releaseNoteSlug with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientTestimonialController\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientTestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientTestimonialController\:\:edit\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientTestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientTestimonialController\:\:edit\(\) has parameter \$testimonialId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientTestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientTestimonialController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientTestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientTestimonialController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientTestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientTestimonialController\:\:show\(\) has parameter \$testimonialId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientTestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientTestimonialController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientTestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientTestimonialController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientTestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientTestimonialController\:\:update\(\) has parameter \$testimonialId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientTestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientVoteController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientVoteController\:\:logActivity\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientVoteController\:\:logActivity\(\) has parameter \$causer with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientVoteController\:\:logActivity\(\) has parameter \$clientId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientVoteController\:\:logActivity\(\) has parameter \$log with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientVoteController\:\:logActivity\(\) has parameter \$subject with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ClientVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ClientVoteController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ClientVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ContactController\:\:edit\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ContactController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ContactController\:\:edit\(\) has parameter \$contactId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ContactController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ContactController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ContactController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ContactController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ContactController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ContactController\:\:show\(\) has parameter \$contactId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ContactController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ContactController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ContactController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ContactController\:\:update\(\) has parameter \$contactId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ContactController.php
+
+		-
+			message: '#^Parameter \#2 \$direction of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Contact\>\:\:orderBy\(\) expects ''asc''\|''desc''\|SortDirection, ''DESC'' given\.$#'
+			identifier: argument.type
+			count: 4
+			path: app/Http/Controllers/ContactController.php
+
+		-
+			message: '#^Parameter \#2 \$flags of function json_encode expects int, true given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/ContactController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ContactNoteController\:\:edit\(\) has parameter \$contactId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ContactNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ContactNoteController\:\:update\(\) has parameter \$contactId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ContactNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\DashboardController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\IframeReleaseNoteController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/IframeReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostArchiveController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostArchiveController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostArchiveController\:\:destroy\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostArchiveController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostArchiveController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostArchiveController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostArchiveController\:\:store\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostArchiveController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notify\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Http/Controllers/PostCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostCommentController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostCommentController\:\:index\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostCommentController\:\:logActivity\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostCommentController\:\:logActivity\(\) has parameter \$causer with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostCommentController\:\:logActivity\(\) has parameter \$clientId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostCommentController\:\:logActivity\(\) has parameter \$log with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostCommentController\:\:logActivity\(\) has parameter \$subject with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostCommentController\:\:notifyUser\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostCommentController\:\:notifyUser\(\) has parameter \$comment with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostCommentController\:\:notifyUser\(\) has parameter \$model with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostCommentController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostCommentController\:\:store\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostCommentController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:edit\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:edit\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:show\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostController\:\:update\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostMergeController\:\:store\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostMergeController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostNoteController\:\:edit\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostNoteController\:\:update\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostPublicationController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostPublicationController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostPublicationController\:\:destroy\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostPublicationController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostPublicationController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostPublicationController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostPublicationController\:\:store\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostPublicationController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostStageController\:\:move\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostStageController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostStatusController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/PostStatusController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostStatusController\:\:update\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostStatusController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostVoteController\:\:index\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PostVoteController\:\:store\(\) has parameter \$postId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/PostVoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNoteController\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNoteController\:\:edit\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNoteController\:\:edit\(\) has parameter \$releaseNoteId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNoteController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNoteController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNoteController\:\:show\(\) has parameter \$releaseNoteId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNoteController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNoteController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNoteController\:\:update\(\) has parameter \$releaseNoteId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ReleaseNoteController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNotePublicationController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ReleaseNotePublicationController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNotePublicationController\:\:destroy\(\) has parameter \$releaseNoteId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ReleaseNotePublicationController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNotePublicationController\:\:releaseNote\(\) has parameter \$releaseNoteId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ReleaseNotePublicationController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNotePublicationController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ReleaseNotePublicationController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ReleaseNotePublicationController\:\:store\(\) has parameter \$releaseNoteId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/ReleaseNotePublicationController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:domain\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/SettingsController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SettingsController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/SettingsController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:destroy\(\) has parameter \$tagId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:show\(\) has parameter \$tagId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TagController\:\:update\(\) has parameter \$tagId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TestimonialApprovalController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TestimonialApprovalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TestimonialApprovalController\:\:destroy\(\) has parameter \$testimonialId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/TestimonialApprovalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TestimonialApprovalController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TestimonialApprovalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TestimonialApprovalController\:\:store\(\) has parameter \$testimonialId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/TestimonialApprovalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TestimonialController\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TestimonialController\:\:edit\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TestimonialController\:\:edit\(\) has parameter \$testimonialId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/TestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TestimonialController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TestimonialController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TestimonialController\:\:show\(\) has parameter \$testimonialId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/TestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TestimonialController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TestimonialController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/TestimonialController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TestimonialController\:\:update\(\) has parameter \$testimonialId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Controllers/TestimonialController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model&object\{pivot\: Illuminate\\Database\\Eloquent\\Relations\\Pivot\}\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/UpdateClientController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UpdateClientController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/UpdateClientController.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\HttpFoundation\\Response\:\:header\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Middleware/AllowIframeMiddleware.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model&object\{pivot\: Illuminate\\Database\\Eloquent\\Relations\\Pivot\}\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/GrabClientIdFromSessionMiddleware.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Auth\\LoginRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Auth/LoginRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\ProfileUpdateRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/ProfileUpdateRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\StoreSendingDomainRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/StoreSendingDomainRequest.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ReleaseNoteResource\:\:\$content\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Resources/ReleaseNoteResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ReleaseNoteResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ReleaseNoteResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ReleaseNoteResource\:\:\$published_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ReleaseNoteResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\ReleaseNoteResource\:\:\$title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/ReleaseNoteResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\ReleaseNoteResource\:\:readableDate\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Resources/ReleaseNoteResource.php
+
+		-
+			message: '#^Property App\\Jobs\\DeliverWebhook\:\:\$backoff type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Jobs/DeliverWebhook.php
+
+		-
+			message: '#^Property App\\Jobs\\SendSlackMessage\:\:\$backoff type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Jobs/SendSlackMessage.php
+
+		-
+			message: '#^Call to function is_array\(\) with non\-falsy\-string will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: app/Jobs/SyncContactAttributes.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Listeners/RequestTestimonial.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$testimonialAutomationEnabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Listeners/RequestTestimonial.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:posts\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Listeners/RequestTestimonial.php
+
+		-
+			message: '#^Method App\\Listeners\\RequestTestimonial\:\:sendTestimonialRequest\(\) has parameter \$contact with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Listeners/RequestTestimonial.php
+
+		-
+			message: '#^Method App\\Mail\\TestimonialRequest\:\:attachments\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Mail/TestimonialRequest.php
+
+		-
+			message: '#^Offset 0 on non\-empty\-list\<string\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Mail/TestimonialRequest.php
+
+		-
+			message: '#^Property App\\Mail\\TestimonialRequest\:\:\$client has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: app/Mail/TestimonialRequest.php
+
+		-
+			message: '#^Property App\\Mail\\TestimonialRequest\:\:\$contentAfterButton has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: app/Mail/TestimonialRequest.php
+
+		-
+			message: '#^Property App\\Mail\\TestimonialRequest\:\:\$contentBeforeButton has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: app/Mail/TestimonialRequest.php
+
+		-
+			message: '#^Property App\\Mail\\TestimonialRequest\:\:\$testimonialUrl has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: app/Mail/TestimonialRequest.php
+
+		-
+			message: '#^Method App\\Mcp\\Support\\ToolResponse\:\:paginator\(\) has parameter \$paginator with generic class Illuminate\\Pagination\\LengthAwarePaginator but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Mcp/Support/ToolResponse.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Contacts\\CreateContactTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\ArrayType\|Illuminate\\JsonSchema\\Types\\NumberType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Contacts/CreateContactTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Contacts\\GetContactTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\IntegerType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Contacts/GetContactTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Contacts\\ListContactsTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\IntegerType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Contacts/ListContactsTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Contacts\\UpdateContactTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\ArrayType\|Illuminate\\JsonSchema\\Types\\IntegerType\|Illuminate\\JsonSchema\\Types\\NumberType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Contacts/UpdateContactTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Posts\\CreatePostCommentTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\IntegerType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Posts/CreatePostCommentTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Posts\\CreatePostTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\ArrayType\|Illuminate\\JsonSchema\\Types\\IntegerType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Posts/CreatePostTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Posts\\GetPostTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\IntegerType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Posts/GetPostTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Posts\\ListPostsTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\BooleanType\|Illuminate\\JsonSchema\\Types\\IntegerType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Posts/ListPostsTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Posts\\UpdatePostTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\ArrayType\|Illuminate\\JsonSchema\\Types\\IntegerType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Posts/UpdatePostTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\ReleaseNotes\\CreateReleaseNoteTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\ArrayType\|Illuminate\\JsonSchema\\Types\\BooleanType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/ReleaseNotes/CreateReleaseNoteTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\ReleaseNotes\\GetReleaseNoteTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\IntegerType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/ReleaseNotes/GetReleaseNoteTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\ReleaseNotes\\ListReleaseNotesTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\BooleanType\|Illuminate\\JsonSchema\\Types\\IntegerType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/ReleaseNotes/ListReleaseNotesTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\ReleaseNotes\\UpdateReleaseNoteTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\ArrayType\|Illuminate\\JsonSchema\\Types\\BooleanType\|Illuminate\\JsonSchema\\Types\\IntegerType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/ReleaseNotes/UpdateReleaseNoteTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Tags\\CreateTagTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Tags/CreateTagTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Tags\\DeleteTagTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\IntegerType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Tags/DeleteTagTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Tags\\ListTagsTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\IntegerType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Tags/ListTagsTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Tags\\UpdateTagTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\IntegerType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Tags/UpdateTagTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Testimonials\\CreateTestimonialTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\IntegerType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Testimonials/CreateTestimonialTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Testimonials\\GetTestimonialTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\IntegerType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Testimonials/GetTestimonialTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Testimonials\\ListTestimonialsTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\BooleanType\|Illuminate\\JsonSchema\\Types\\IntegerType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Testimonials/ListTestimonialsTool.php
+
+		-
+			message: '#^Method App\\Mcp\\Tools\\Testimonials\\UpdateTestimonialTool\:\:schema\(\) should return array\<string, Illuminate\\Contracts\\JsonSchema\\JsonSchema\> but returns array\<string, Illuminate\\JsonSchema\\Types\\IntegerType\|Illuminate\\JsonSchema\\Types\\StringType\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Mcp/Tools/Testimonials/UpdateTestimonialTool.php
+
+		-
+			message: '#^Class App\\Models\\Board uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Board.php
+
+		-
+			message: '#^Method App\\Models\\Board\:\:client\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Board.php
+
+		-
+			message: '#^Method App\\Models\\Board\:\:posts\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Board.php
+
+		-
+			message: '#^Method App\\Models\\Board\:\:scopePublic\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Board.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$domain\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$sender_local_part\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:slackWebhook\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:testimonialAutomation\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:testimonialEmailBody\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:testimonialRating\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Class App\\Models\\Client uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Dead catch \- Illuminate\\Contracts\\Encryption\\DecryptException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Method App\\Models\\Client\:\:boards\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Method App\\Models\\Client\:\:getPublicSiteAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Method App\\Models\\Client\:\:sendingDomain\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasOne does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Method App\\Models\\Client\:\:settings\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Method App\\Models\\Client\:\:stages\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Method App\\Models\\Client\:\:testimonials\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Method App\\Models\\Client\:\:users\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Client.php
+
+		-
+			message: '#^Class App\\Models\\ClientSetting uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ClientSetting.php
+
+		-
+			message: '#^Method App\\Models\\ClientSetting\:\:scopeDomain\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/ClientSetting.php
+
+		-
+			message: '#^Method App\\Models\\ClientSetting\:\:scopeSlackWebhook\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/ClientSetting.php
+
+		-
+			message: '#^Method App\\Models\\ClientSetting\:\:scopeTestimonialAutomation\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/ClientSetting.php
+
+		-
+			message: '#^Method App\\Models\\ClientSetting\:\:scopeTestimonialEmailBody\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/ClientSetting.php
+
+		-
+			message: '#^Method App\\Models\\ClientSetting\:\:scopeTestimonialRating\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/ClientSetting.php
+
+		-
+			message: '#^Class App\\Models\\Comment uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Comment.php
+
+		-
+			message: '#^Method App\\Models\\Comment\:\:commentable\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Comment.php
+
+		-
+			message: '#^Method App\\Models\\Comment\:\:contact\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Comment.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$public_site\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Call to function is_array\(\) with non\-falsy\-string will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Call to function is_array\(\) with string\|null will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Class App\\Models\\Contact uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:client\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:comments\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:generateInitialsImage\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:getAvatarAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:getAvatarAttribute\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:getMetadataArrayAttribute\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:getPilgrimField\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:getPilgrimField\(\) has parameter \$default with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:getPilgrimField\(\) has parameter \$pilgrimField with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:getPilgrimFieldsAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:messages\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:posts\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:setPilgrimField\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:setPilgrimField\(\) has parameter \$pilgrimField with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:setPilgrimField\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:tags\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphToMany does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:testimonials\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Method App\\Models\\Contact\:\:votes\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Unable to resolve the template type TKey in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Unable to resolve the template type TValue in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^Class App\\Models\\ContactAttribute uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ContactAttribute.php
+
+		-
+			message: '#^Method App\\Models\\ContactAttribute\:\:client\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ContactAttribute.php
+
+		-
+			message: '#^Class App\\Models\\Message uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Message.php
+
+		-
+			message: '#^Method App\\Models\\Message\:\:contact\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Message.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Class App\\Models\\Post uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:board\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:client\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:comments\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:contact\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:getContentExcerptAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:scopeForBoard\(\) has parameter \$boardId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:scopeForBoard\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:scopePublic\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:scopeStageName\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:scopeVotedByContact\(\) has parameter \$contactId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:scopeVotedByContact\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:scopeWithScore\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:stage\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:tags\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphToMany does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Method App\\Models\\Post\:\:votes\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Post.php
+
+		-
+			message: '#^Class App\\Models\\ReleaseNote uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ReleaseNote.php
+
+		-
+			message: '#^Method App\\Models\\ReleaseNote\:\:comments\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ReleaseNote.php
+
+		-
+			message: '#^Method App\\Models\\ReleaseNote\:\:getPathAttribute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/ReleaseNote.php
+
+		-
+			message: '#^Method App\\Models\\ReleaseNote\:\:scopeClient\(\) has parameter \$clientId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/ReleaseNote.php
+
+		-
+			message: '#^Method App\\Models\\ReleaseNote\:\:scopeClient\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/ReleaseNote.php
+
+		-
+			message: '#^Method App\\Models\\ReleaseNote\:\:scopePublished\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/ReleaseNote.php
+
+		-
+			message: '#^Method App\\Models\\ReleaseNote\:\:scopeVotedByContact\(\) has parameter \$contactId with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/ReleaseNote.php
+
+		-
+			message: '#^Method App\\Models\\ReleaseNote\:\:scopeVotedByContact\(\) has parameter \$query with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/ReleaseNote.php
+
+		-
+			message: '#^Method App\\Models\\ReleaseNote\:\:tags\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphToMany does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ReleaseNote.php
+
+		-
+			message: '#^Method App\\Models\\ReleaseNote\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ReleaseNote.php
+
+		-
+			message: '#^Method App\\Models\\ReleaseNote\:\:votes\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ReleaseNote.php
+
+		-
+			message: '#^Class App\\Models\\SendingDomain uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/SendingDomain.php
+
+		-
+			message: '#^Method App\\Models\\SendingDomain\:\:client\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/SendingDomain.php
+
+		-
+			message: '#^Class App\\Models\\Stage uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Stage.php
+
+		-
+			message: '#^Method App\\Models\\Stage\:\:client\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Stage.php
+
+		-
+			message: '#^Method App\\Models\\Stage\:\:posts\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Stage.php
+
+		-
+			message: '#^Method App\\Models\\Stage\:\:scopeOfType\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Stage.php
+
+		-
+			message: '#^Method App\\Models\\Stage\:\:scopeOnRoadmap\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Stage.php
+
+		-
+			message: '#^Class App\\Models\\Tag uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Tag.php
+
+		-
+			message: '#^Method App\\Models\\Tag\:\:contacts\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphToMany does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Tag.php
+
+		-
+			message: '#^Method App\\Models\\Tag\:\:posts\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphToMany does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Tag.php
+
+		-
+			message: '#^Method App\\Models\\Tag\:\:releaseNotes\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphToMany does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Tag.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$avatar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Class App\\Models\\Testimonial uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Method App\\Models\\Testimonial\:\:client\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Method App\\Models\\Testimonial\:\:comments\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Method App\\Models\\Testimonial\:\:contact\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Method App\\Models\\Testimonial\:\:getAvatarImageAttribute\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Method App\\Models\\Testimonial\:\:scopeApproved\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Method App\\Models\\Testimonial\:\:scopeApproved\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Method App\\Models\\Testimonial\:\:scopePending\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Method App\\Models\\Testimonial\:\:scopePending\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Method App\\Models\\Testimonial\:\:scopeVisibleTo\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Method App\\Models\\Testimonial\:\:scopeVisibleTo\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Method App\\Models\\Testimonial\:\:votes\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Testimonial.php
+
+		-
+			message: '#^Class App\\Models\\User uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Match expression does not handle remaining value\: string$#'
+			identifier: match.unhandled
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Method App\\Models\\User\:\:client\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Method App\\Models\\User\:\:clients\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Method App\\Models\\User\:\:contact\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasOne does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Method App\\Models\\User\:\:contacts\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property App\\Models\\User\:\:\$hidden is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$hidden\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Class App\\Models\\Vote uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Vote.php
+
+		-
+			message: '#^Method App\\Models\\Vote\:\:contact\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Vote.php
+
+		-
+			message: '#^Method App\\Models\\Vote\:\:post\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Vote.php
+
+		-
+			message: '#^Method App\\Models\\Vote\:\:votable\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Vote.php
+
+		-
+			message: '#^Class App\\Models\\Webhook uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Webhook.php
+
+		-
+			message: '#^Method App\\Models\\Webhook\:\:client\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Webhook.php
+
+		-
+			message: '#^Method App\\Models\\Webhook\:\:deliveries\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Webhook.php
+
+		-
+			message: '#^Method App\\Models\\Webhook\:\:scopeActive\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Webhook.php
+
+		-
+			message: '#^Method App\\Models\\WebhookDelivery\:\:webhook\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/WebhookDelivery.php
+
+		-
+			message: '#^Class App\\Models\\WeeklyReport uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/WeeklyReport.php
+
+		-
+			message: '#^Method App\\Models\\WeeklyReport\:\:client\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/WeeklyReport.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/PostCommented.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:mailSender\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Notifications/PostCommented.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:mailSender\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Notifications/PostCompletedNotification.php
+
+		-
+			message: '#^Method App\\Notifications\\PostCompletedNotification\:\:__construct\(\) has parameter \$isOwner with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Notifications/PostCompletedNotification.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/PostCreatedByContact.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:mailSender\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Notifications/PostStatusChangedNotification.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/ReleaseNoteCommented.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/WeeklyReportNotification.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:generateAuthUrl\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Providers/ViewServiceProvider.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Contact\:\:\$published_posts_count\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Access to an undefined property Spatie\\Activitylog\\Models\\Activity\:\:\$logins\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\DashboardMetricsService\:\:getContactLoginsByDay\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\DashboardMetricsService\:\:getContactsWithLoginCounts\(\) has parameter \$loginCounts with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\DashboardMetricsService\:\:getContactsWithLoginCounts\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\DashboardMetricsService\:\:getContactsWithMostActivity\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\DashboardMetricsService\:\:getContactsWithMostComments\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\DashboardMetricsService\:\:getContactsWithMostPosts\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\DashboardMetricsService\:\:getContactsWithMostPostsPublished\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\DashboardMetricsService\:\:getDashboardSummary\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\DashboardMetricsService\:\:getLoginCounts\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\DashboardMetricsService\:\:getTimeRange\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\DashboardMetricsService\:\:getTopContactsByActivity\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\DashboardMetricsService\:\:getTopContactsByLogins\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\DashboardMetricsService\:\:getTopContactsByPostsPublished\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Contact\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Parameter \#3 \$callback of static method Illuminate\\Cache\\Repository\:\:remember\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Contact\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Return type of call to static method Illuminate\\Cache\\Repository\:\:remember\(\) contains unresolvable type\.$#'
+			identifier: staticMethod.unresolvableReturnType
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>logins" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/DashboardMetricsService.php
+
+		-
+			message: '#^Method App\\Services\\SesSendingDomainsService\:\:call\(\) return type has no value type specified in iterable type Aws\\Result\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/SesSendingDomainsService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Contact\:\:\$published_posts_count\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Method App\\Services\\WeeklyReportService\:\:collectMetrics\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Method App\\Services\\WeeklyReportService\:\:generateReportsForAllClients\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Method App\\Services\\WeeklyReportService\:\:generateReportsForAllClients\(\) should return Illuminate\\Database\\Eloquent\\Collection but returns Illuminate\\Support\\Collection\<\(int\|string\), mixed\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Method App\\Services\\WeeklyReportService\:\:getContactsWithLoginCounts\(\) has parameter \$loginCounts with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Method App\\Services\\WeeklyReportService\:\:getContactsWithLoginCounts\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Method App\\Services\\WeeklyReportService\:\:getContactsWithMostActivity\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Method App\\Services\\WeeklyReportService\:\:getContactsWithMostComments\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Method App\\Services\\WeeklyReportService\:\:getContactsWithMostPosts\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Method App\\Services\\WeeklyReportService\:\:getContactsWithMostPostsPublished\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Method App\\Services\\WeeklyReportService\:\:getLoginCounts\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Method App\\Services\\WeeklyReportService\:\:getTimeRange\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Contact\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Contact\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Services/WeeklyReportService.php
+
+		-
+			message: '#^Method App\\Support\\ClientContext\:\:user\(\) should return App\\Models\\User but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Support/ClientContext.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tokenable" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Support/ClientContext.php
+
+		-
+			message: '#^Method App\\Support\\NotFoundMessage\:\:for\(\) has parameter \$exception with generic class Illuminate\\Database\\Eloquent\\ModelNotFoundException but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Support/NotFoundMessage.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contact\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/PostStageTransition.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/PostStageTransition.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notify\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Support/PostStageTransition.php
+
+		-
+			message: '#^Unsafe call to private method App\\Support\\PostStageTransition\:\:notifyAudience\(\) through static\:\:\.$#'
+			identifier: staticClassAccess.privateMethod
+			count: 2
+			path: app/Support/PostStageTransition.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:public\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Support/RoadmapData.php
+
+		-
+			message: '#^Method App\\View\\Components\\Base\\Input\:\:__construct\(\) has parameter \$placeholder with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/View/Components/Base/Input.php
+
+		-
+			message: '#^Method App\\View\\Components\\Base\\Input\:\:__construct\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/View/Components/Base/Input.php
+
+		-
+			message: '#^Method App\\View\\Components\\Base\\Textarea\:\:__construct\(\) has parameter \$id with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/View/Components/Base/Textarea.php
+
+		-
+			message: '#^Method App\\View\\Components\\Base\\Textarea\:\:__construct\(\) has parameter \$name with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/View/Components/Base/Textarea.php
+
+		-
+			message: '#^Method App\\View\\Components\\Base\\Textarea\:\:__construct\(\) has parameter \$rows with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/View/Components/Base/Textarea.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$votes_count\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/View/Components/GenericVoteForm.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:votes\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/View/Components/GenericVoteForm.php
+
+		-
+			message: '#^Property App\\View\\Components\\GenericVoteForm\:\:\$contact has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: app/View/Components/GenericVoteForm.php
+
+		-
+			message: '#^Property App\\View\\Components\\GenericVoteForm\:\:\$hasVoted has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: app/View/Components/GenericVoteForm.php
+
+		-
+			message: '#^Property App\\View\\Components\\GenericVoteForm\:\:\$votesCount has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: app/View/Components/GenericVoteForm.php
+
+		-
+			message: '#^Method App\\View\\Components\\Public\\Breadcrumbs\\Item\:\:__construct\(\) has parameter \$href with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/View/Components/Public/Breadcrumbs/Item.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/View/Components/PublicPostForm.php

@@ -1,0 +1,18 @@
+# gitleaks configuration. scripts/export-public.sh runs gitleaks on the
+# public copy, and gitleaks reads this file from the root of the copy.
+#
+# The file keeps all the default rules. It only allows the placeholder
+# tokens of the API examples, which are not secrets.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Placeholder tokens in the API examples"
+regexTarget = "match"
+regexes = ['''YOUR_API_TOKEN''']
+
+[[allowlists]]
+description = "Fake tokens in the URLs of the example domain acme.example.com"
+regexTarget = "line"
+regexes = ['''https://acme\.example\.com/''']
