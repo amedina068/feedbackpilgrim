@@ -59,14 +59,21 @@ Paste this prompt into Claude Code, Codex or another agent that has a shell on t
 Read https://raw.githubusercontent.com/amedina068/feedbackpilgrim/main/INSTALL.md and install Feedback Pilgrim on this server.
 ```
 
-The agent installs the app, creates the owner and makes an API token. Its last step gives you a line that connects your agent to the MCP server of the instance:
+The agent installs the app, creates the owner and makes an API token. Its last step gives you the lines that connect your agent to the MCP server of the instance:
 
 ```bash
+export FP_TOKEN=<token>
 claude mcp add --transport http feedback-pilgrim https://feedback.example.com/mcp \
-  --header "Authorization: Bearer <token>"
+  --header "Authorization: Bearer ${FP_TOKEN}"
 ```
 
-To show the line again, run `docker exec feedbackpilgrim php artisan fp:mcp:connect --client=claude`.
+To show the lines again, run `docker exec feedbackpilgrim php artisan fp:mcp:connect --client=claude`. The client can also be `codex`, `cursor` or `json`.
+
+A second MCP server operates the instance itself: status, doctor, users, tokens and the queue. It runs over SSH, with no open port:
+
+```bash
+claude mcp add fp-admin -- ssh my-server docker exec -i feedbackpilgrim php artisan mcp:start fp-admin
+```
 
 ## MySQL and Redis
 
@@ -120,6 +127,8 @@ Each command accepts `--json` for scripts and agents.
 |---|---|
 | `fp:status` | Shows the version, the database, the queue, the scheduler and the mail driver. |
 | `fp:doctor` | Finds problems and gives the fix for each. `--fix` applies the safe fixes. |
+| `fp:install` | Creates the owner and the first project. Returns a one-time login link. |
+| `fp:token:create` | Makes an API token. `fp:token:list` and `fp:token:revoke` manage the tokens. |
 | `fp:setup-url` | Shows the setup URL again. |
 | `fp:user:password` | Sets a new password for a user. |
 | `fp:mcp:connect` | Prints the line that connects an AI agent. |
