@@ -98,4 +98,45 @@ class ContactEditTest extends TestCase
 
         $this->assertSame('ada@example.com', $this->contact->fresh()->email);
     }
+
+    public function test_a_save_keeps_only_the_custom_fields_that_the_form_sends(): void
+    {
+        $this->contact->update(['metadata' => json_encode([
+            'company' => 'Acme',
+            'pilgrim_last_login' => '2026-11-01 10:00:00',
+        ])]);
+
+        $this->actingAs($this->user)
+            ->patch("/contacts/{$this->contact->id}", [
+                'name' => 'Ada Lovelace',
+                'email' => 'ada@example.com',
+                'custom_fields' => ['plan' => 'pro'],
+            ])
+            ->assertRedirect("/contacts/{$this->contact->id}");
+
+        $this->assertSame(
+            ['plan' => 'pro', 'pilgrim_last_login' => '2026-11-01 10:00:00'],
+            json_decode($this->contact->fresh()->metadata, true),
+        );
+    }
+
+    public function test_a_save_without_custom_fields_keeps_only_the_pilgrim_fields(): void
+    {
+        $this->contact->update(['metadata' => json_encode([
+            'company' => 'Acme',
+            'pilgrim_last_login' => '2026-11-01 10:00:00',
+        ])]);
+
+        $this->actingAs($this->user)
+            ->patch("/contacts/{$this->contact->id}", [
+                'name' => 'Ada Lovelace',
+                'email' => 'ada@example.com',
+            ])
+            ->assertRedirect("/contacts/{$this->contact->id}");
+
+        $this->assertSame(
+            ['pilgrim_last_login' => '2026-11-01 10:00:00'],
+            json_decode($this->contact->fresh()->metadata, true),
+        );
+    }
 }
