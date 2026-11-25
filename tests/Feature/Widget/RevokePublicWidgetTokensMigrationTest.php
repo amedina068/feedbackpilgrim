@@ -6,7 +6,6 @@ use App\Models\Client;
 use App\Models\ClientSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Redis;
 use Laravel\Sanctum\PersonalAccessToken;
 use Tests\TestCase;
 
@@ -158,9 +157,6 @@ class RevokePublicWidgetTokensMigrationTest extends TestCase
 
     public function test_widget_rejects_the_old_value_after_the_migration(): void
     {
-        Redis::shouldReceive('get')->andReturn(null);
-        Redis::shouldReceive('set')->andReturn(true);
-
         $publicToken = $this->makeLegacyPublicToken();
 
         $this->runMigration();

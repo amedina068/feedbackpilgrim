@@ -6,7 +6,6 @@ use App\Models\Client;
 use App\Models\Contact;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Redis;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -21,10 +20,6 @@ class InitControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Never touch a real Redis server: it can hold the data of other apps.
-        Redis::shouldReceive('get')->andReturn(null);
-        Redis::shouldReceive('set')->andReturn(true);
 
         // The sign-in link holds an expiry time. Compare links made in the same second.
         $this->freezeTime();

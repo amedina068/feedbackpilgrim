@@ -9,7 +9,7 @@ use App\Support\WidgetContactToken;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Cache;
 use Spatie\Activitylog\Models\Activity;
 
 trait HandlesInitRequests
@@ -130,7 +130,7 @@ trait HandlesInitRequests
 
     protected function logLogin(Contact $contact): string
     {
-        $timestamp = Redis::get('login_'.$contact->id);
+        $timestamp = Cache::get('login_'.$contact->id);
 
         if (! $timestamp) {
             return $this->createTimestamp($contact);
@@ -155,7 +155,7 @@ trait HandlesInitRequests
 
         $timestamp = now()->format('Y-m-d H:i:s');
 
-        Redis::set('login_'.$contact->id, $timestamp, 'EX', 60 * 60 * 24);
+        Cache::put('login_'.$contact->id, $timestamp, now()->addDay());
 
         return $timestamp;
     }
