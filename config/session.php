@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\InstanceUrl;
 use Illuminate\Support\Str;
 
 return [
@@ -128,7 +129,7 @@ return [
 
     'cookie' => env(
         'SESSION_COOKIE',
-        Str::slug(env('APP_NAME', 'laravel'), '_').'_session'
+        Str::slug(env('APP_NAME') ?: 'Feedback Pilgrim', '_').'_session'
     ),
 
     /*
@@ -155,7 +156,10 @@ return [
     |
     */
 
-    'domain' => env('SESSION_DOMAIN'),
+    // Not set: ".APP_DOMAIN", or no domain for localhost and IP addresses.
+    'domain' => env('SESSION_DOMAIN', fn () => InstanceUrl::sessionDomain(
+        InstanceUrl::domain(env('APP_DOMAIN'), InstanceUrl::url(env('APP_URL'), env('APP_DOMAIN')))
+    )),
 
     /*
     |--------------------------------------------------------------------------
@@ -168,7 +172,10 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    // Not set: true only when APP_URL uses https.
+    'secure' => env('SESSION_SECURE_COOKIE', fn () => InstanceUrl::isSecure(
+        InstanceUrl::url(env('APP_URL'), env('APP_DOMAIN'))
+    )),
 
     /*
     |--------------------------------------------------------------------------
