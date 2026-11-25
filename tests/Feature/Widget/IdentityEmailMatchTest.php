@@ -6,13 +6,13 @@ use App\Models\Client;
 use App\Models\Contact;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redis;
 use Tests\TestCase;
 
 /**
  * Production uses MySQL with a utf8mb4 collation that ignores case and
  * accents. Thus "jose@" and "josé@" are equal in a WHERE clause. These tests
  * give SQLite the same comparison, so that they show the production result.
+ * On MySQL, the real collation does the comparison.
  */
 class IdentityEmailMatchTest extends TestCase
 {
@@ -22,15 +22,19 @@ class IdentityEmailMatchTest extends TestCase
     {
         parent::setUp();
 
-        Redis::shouldReceive('get')->andReturn(null);
-        Redis::shouldReceive('set')->andReturn(true);
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            return;
+        }
 
         $fold = fn (string $value): string => strtolower((string) iconv('UTF-8', 'ASCII//TRANSLIT', $value));
 
-        DB::connection()->getPdo()->sqliteCreateCollation(
-            'BINARY',
-            fn (string $left, string $right): int => strcmp($fold($left), $fold($right)),
-        );
+        // The email columns use NOCASE on SQLite. The other text columns use BINARY.
+        foreach (['BINARY', 'NOCASE'] as $collation) {
+            DB::connection()->getPdo()->sqliteCreateCollation(
+                $collation,
+                fn (string $left, string $right): int => strcmp($fold($left), $fold($right)),
+            );
+        }
     }
 
     private function initAs(Client $client, string $email, string $name)
