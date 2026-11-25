@@ -49,6 +49,10 @@ class EntitlementsTest extends TestCase
     public function test_the_default_binding_allows_everything(): void
     {
         $user = User::factory()->create();
+
+        // Remove a binding that an installed package made, so that only the core binds.
+        $this->app->offsetUnset(Entitlements::class);
+        (new AppServiceProvider($this->app))->register();
         $entitlements = $this->app->make(Entitlements::class);
 
         $this->assertInstanceOf(UnlimitedEntitlements::class, $entitlements);

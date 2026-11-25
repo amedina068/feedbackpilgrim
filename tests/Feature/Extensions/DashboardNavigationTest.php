@@ -5,6 +5,7 @@ namespace Tests\Feature\Extensions;
 use App\Models\Client;
 use App\Models\Contact;
 use App\Models\User;
+use App\Support\DashboardBanners;
 use App\Support\DashboardNavigation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -16,6 +17,18 @@ use Tests\TestCase;
 class DashboardNavigationTest extends TestCase
 {
     use RefreshDatabase;
+
+    /**
+     * Start each test with empty registries. An installed package, for
+     * example a hosted edition, can add its own banners and links.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->app->instance(DashboardBanners::class, new DashboardBanners);
+        $this->app->instance(DashboardNavigation::class, new DashboardNavigation);
+    }
 
     private function actingAdmin(): User
     {
