@@ -8,6 +8,10 @@ This file lists the changes to the code for each release. The release notes for 
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-25
+
+The first public release.
+
 ### Added
 
 - `install.sh`, an installer for a server with Docker. It asks only for the domain and ends with the setup URL.
@@ -25,6 +29,21 @@ This file lists the changes to the code for each release. The release notes for 
 - An **Import** button on the Testimonials page. It imports a CSV export from Senja. Each row with text becomes an approved testimonial. A second import of the same file skips the rows that are already imported, and the result shows their count. A queued job copies each avatar to the app storage, so the public site does not load images from Senja.
 - Example files in `deploy/` for an install without Docker: NGINX, Caddy, systemd and Supervisor. An NGINX example for a proxy in front of the Docker stack.
 - A **Settings > Email** page to send email from the domain of a project through Amazon SES. The page shows the DNS records, and the app checks a pending domain every 10 minutes. Until SES verifies the domain, emails go out from `MAIL_FROM_ADDRESS`. The new `AWS_SES_*` values are optional.
+- Feedback boards with posts, votes, comments, tags and stages. A project can have more than one board.
+- A public site for each project on its own subdomain, with the posts, the roadmap, the release notes and the testimonials.
+- Revenue weighting: the MRR and the LTV of each contact, and a sort of the requests by revenue.
+- Release notes, and a notification to the voters when a request ships.
+- Testimonials with a rating, and an approval step before a testimonial shows.
+- An embeddable widget (`pilgrim.js`) that signs in the users of your app with a publishable key and an HMAC `userHash`.
+- A versioned REST API with an OpenAPI document and a Postman collection.
+- An MCP server for AI agents, with tools for posts, comments, release notes, contacts, testimonials and tags.
+- Signed webhooks and Slack messages.
+- A weekly report (`fp:weekly`) that the scheduler starts each Monday.
+- Self-hosting with Docker Compose: web, queue worker, scheduler, MySQL and Redis.
+- A Docker image on GHCR for each release, for `linux/amd64` and `linux/arm64`, and `docker-compose.image.yml` to run it without a build.
+- A first-run setup page and the `fp:install` command to create the owner of the instance.
+- Open and closed registration modes, an owner role, user deactivation and account recovery commands (`fp:user:list`, `fp:user:password`).
+- Optional Mailgun, Amazon SES, Rollbar and Plausible.
 
 ### Changed
 
@@ -43,16 +62,16 @@ This file lists the changes to the code for each release. The release notes for 
 - Each error of the REST API and the widget `init` call has a `message` field. The `error` field stays for older clients.
 - A missing record gives a message that names the record and the ID, for example `No post with ID 42 exists for the client of this token.` This applies to the REST API and the MCP tools.
 
+### Deprecated
+
+- The `X-FeedbackPilgrim-Signature` webhook header signs the body only. The next release removes it. Verify `X-FeedbackPilgrim-Signature-V2` instead.
+
 ### Removed
 
 - The `alpinejs` package. The app did not start Alpine, so its directives did nothing. Vue components replace them.
 - The `mitt` package. No code imported it.
 - The message pages: `MessageController`, `MessageNoteController`, `MessageStatusController`, their views, and the `latest-messages` and `message-panel` components. No route or view used them. The `Message` model and its table stay.
 - The lookup of the `custom_domain` client setting. Nothing in the app set it, and custom domains are not supported. A host outside `APP_DOMAIN` gets 404.
-
-### Deprecated
-
-- The `X-FeedbackPilgrim-Signature` webhook header signs the body only. The next release removes it. Verify `X-FeedbackPilgrim-Signature-V2` instead.
 
 ### Fixed
 
@@ -103,28 +122,6 @@ This file lists the changes to the code for each release. The release notes for 
 - An admin who is a member of more than one project now always acts as the admin contact of the current project. Before, the public site, a dashboard comment and a dashboard post without a contact were able to use the admin contact of another project.
 - The post notes and contact notes pages change the post or the contact of the URL. Before, the post notes page changed the first post of the project, and the contact notes page returned 404.
 - The posts and contacts pages of the dashboard accept only their listed sorts. An unknown `sort_by` value shows the default order. Before, it returned 500.
-
-## [0.1.0] - Unreleased
-
-The first public release.
-
-### Added
-
-- Feedback boards with posts, votes, comments, tags and stages. A project can have more than one board.
-- A public site for each project on its own subdomain, with the posts, the roadmap, the release notes and the testimonials.
-- Revenue weighting: the MRR and the LTV of each contact, and a sort of the requests by revenue.
-- Release notes, and a notification to the voters when a request ships.
-- Testimonials with a rating, and an approval step before a testimonial shows.
-- An embeddable widget (`pilgrim.js`) that signs in the users of your app with a publishable key and an HMAC `userHash`.
-- A versioned REST API with an OpenAPI document and a Postman collection.
-- An MCP server for AI agents, with tools for posts, comments, release notes, contacts, testimonials and tags.
-- Signed webhooks and Slack messages.
-- A weekly report (`fp:weekly`) that the scheduler starts each Monday.
-- Self-hosting with Docker Compose: web, queue worker, scheduler, MySQL and Redis.
-- A Docker image on GHCR for each release, for `linux/amd64` and `linux/arm64`, and `docker-compose.image.yml` to run it without a build.
-- A first-run setup page and the `fp:install` command to create the owner of the instance.
-- Open and closed registration modes, an owner role, user deactivation and account recovery commands (`fp:user:list`, `fp:user:password`).
-- Optional Mailgun, Amazon SES, Rollbar and Plausible.
 
 [Unreleased]: https://github.com/amedina068/feedbackpilgrim/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/amedina068/feedbackpilgrim/releases/tag/v0.1.0
