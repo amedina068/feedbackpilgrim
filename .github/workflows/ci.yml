@@ -1,7 +1,8 @@
 name: CI
 
-# The jobs need no repository secrets. The PHP tests use SQLite in memory, the
-# array mailer and the sync queue (phpunit.xml). The E2E tests use a SQLite
+# The jobs need no repository secrets. The PHP tests run two times: on SQLite
+# in memory and on MySQL 8.4 (a service container). They use the array mailer
+# and the sync queue (phpunit.xml). The E2E tests use a SQLite
 # file, the log mailer and the sync queue (.env.e2e), and block each request
 # to another host. So no job sends an email, takes a payment or calls a
 # third-party API.
@@ -50,16 +51,35 @@ jobs:
         run: vendor/bin/pint --test
 
   tests:
-    name: PHP tests
+    name: PHP tests (${{ matrix.db }})
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        db: [sqlite, mysql]
+    services:
+      mysql:
+        # The service starts for both rows of the matrix. Only the mysql row
+        # uses it.
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: feedbackpilgrim_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
     steps:
       - uses: actions/checkout@v5
 
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: gd, exif, pdo_sqlite, redis
+          extensions: gd, exif, pdo_sqlite, pdo_mysql, redis
           coverage: none
 
       - name: Get the Composer cache folder
@@ -80,11 +100,83 @@ jobs:
           cp .env.example .env
           php artisan key:generate
 
-      - name: Run the tests
+      - name: Run the tests on SQLite
+        if: matrix.db == 'sqlite'
         run: php artisan test
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
+
+      # RefreshDatabase loads database/schema/mysql-schema.sql with the mysql
+      # client of the runner.
+      - name: Run the tests on MySQL 8.4
+        if: matrix.db == 'mysql'
+        run: php artisan test
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: feedbackpilgrim_test
+          DB_USERNAME: root
+          DB_PASSWORD: root
+
+  schema-dump:
+    name: Schema dump (${{ matrix.db }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        db: [sqlite, mysql]
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_sqlite, pdo_mysql
+          coverage: none
+
+      - name: Get the Composer cache folder
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Prepare the environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # The script compares a database made from the migrations with a
+      # database made from the committed dump. It fails when a migration is
+      # not in the dump.
+      - name: Make sure that the dump matches the migrations
+        run: scripts/check-schema-dump.sh ${{ matrix.db }}
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USERNAME: root
+          DB_PASSWORD: root
 
   larastan:
     name: Static analysis (Larastan)

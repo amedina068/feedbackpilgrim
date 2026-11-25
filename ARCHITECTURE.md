@@ -546,19 +546,30 @@ and the iframe share one query via `App\Support\RoadmapData::build`.
 
 - `APP_URL` — URL of the dashboard. Its host is the app host, and the admin routes in
   `routes/web.php` bind to it. `Client::public_site` uses its scheme for the client subdomains.
+  Not set: `https://APP_DOMAIN`, or `http://localhost:8080` when `APP_DOMAIN` is also not set.
 - `APP_DOMAIN` — base domain for client boards (`<slug>.APP_DOMAIN`), so the DNS needs a
   wildcard record. It can equal the app host (local) or be its parent (production: app on
   `app.feedbackpilgrim.com`, boards on `<slug>.feedbackpilgrim.com`). The slugs in
-  `Client::RESERVED_SLUGS` are not client boards.
+  `Client::RESERVED_SLUGS` are not client boards. Not set: the host of `APP_URL`.
+  `App\Support\InstanceUrl` derives `APP_URL`, `APP_DOMAIN`, `SESSION_DOMAIN`,
+  `SESSION_SECURE_COOKIE` and `SANCTUM_STATEFUL_DOMAINS` when they are not set or empty. A value in
+  `.env` always wins. `App\Support\ClientHost` maps a host to its client (the
+  `IdentifyClientMiddleware` and the Caddy `ask` route use it).
+- `RedirectLoopbackHost` (global middleware) sends a GET to `127.0.0.1` or `[::1]` to the same
+  path on the app host, with the same port. It does not touch `/up` and `/caddy/ask`.
+- `APP_KEY` — not set or empty: the app reads `APP_KEY_FILE` (default `/data/.secrets/app_key`).
+  The Docker image writes that file on the first boot.
 - `REGISTRATION_ENABLED` — `false` by default. It is only the default of the registration
   mode. The owner stores `open` or `closed` in `/admin/settings`, and the stored value wins
   (`App\Support\Registration`). `RegistrationEnabledMiddleware` (alias `registrationEnabled`)
   returns 404 on `/register` when the mode is `closed`. The setup page or `fp:install` creates
   the owner, the first client and the admin contact on an empty database.
-- `SESSION_DOMAIN` — set to `.APP_DOMAIN` to share the dashboard session with the client
-  subdomains (`adminContactLogin` needs it).
+- `SESSION_DOMAIN` — `.APP_DOMAIN` shares the dashboard session with the client subdomains
+  (`adminContactLogin` needs it). Not set: `.APP_DOMAIN`, or no domain for `localhost` and IP
+  addresses.
 - `SANCTUM_STATEFUL_DOMAINS` — domains allowed cookie-based stateful API auth
-  (`APP_DOMAIN,*.APP_DOMAIN`).
+  (`APP_DOMAIN,*.APP_DOMAIN`). Not set: the local hosts, the app host, `APP_DOMAIN` and
+  `*.APP_DOMAIN`, each with the port of `APP_URL`.
 - `TRUSTED_PROXIES` — the proxies whose `X-Forwarded-*` headers the app trusts, as a
   comma-separated list of IP addresses or CIDR ranges. `config/trustedproxy.php` reads it, and
   an empty value means the Cloudflare ranges (the production setup). `bootstrap/app.php` calls
@@ -578,49 +589,82 @@ and the iframe share one query via `App\Support\RoadmapData::build`.
   optional `AWS_SES_CONFIGURATION_SET` adds an SES configuration set to each email from the `ses`
   mailer. One platform-owned AWS account sends for all clients. Clients do not give AWS keys.
 - Cache store for the sending domain lock — the `LocksSendingDomain` trait uses a cache lock.
-  If the app runs on more than one server, use a shared cache store (`redis` or `database`).
+  If the app runs on more than one server, use a shared cache store (`redis` or `database`). The `HandlesInitRequests` login time uses the cache store too.
   A local store (`file`, `array`) locks only on one server.
 
 ## Deployment (Docker)
 
 - `Dockerfile` — multi-stage build on `serversideup/php:8.3-fpm-nginx` (pinned release). Stages:
-  `vendor` (`composer install --no-dev`), `assets` (`npm run build`, which makes `public/build`
-  and `public/pilgrim.js`), and `app`. The image adds the `gd` and `exif` extensions, listens
-  on port 8080 and runs as `www-data`.
-- `docker-compose.yml` — `web`, `queue` (`queue:work`), `scheduler` (`schedule:work`), `mysql`
-  (MySQL 8.4) and `redis`. Only `web` sets `AUTORUN_ENABLED=true`, so only `web` runs
-  `storage:link`, the migrations and `optimize` at startup. `queue` and `scheduler` wait for a
-  healthy `web`.
-  `web` publishes port `APP_PORT` (8080) on `APP_BIND` (default `127.0.0.1`), so only a proxy
-  on the host reaches it.
-- `docker-compose.image.yml` — the same stack as `docker-compose.yml`, but the app services use
-  the published image `ghcr.io/amedina068/feedbackpilgrim` (tag `FEEDBACKPILGRIM_VERSION`, default
-  `latest`) and do not build. Change both files together.
+  `caddy` (copies the Caddy binary), `vendor` (`composer install --no-dev`), `assets`
+  (`npm run build`, which makes `public/build` and `public/pilgrim.js`), and `app`. The image adds
+  the `gd` and `exif` extensions and the `sqlite3` and `mariadb-client` clients (Laravel loads a
+  schema dump with them). It listens on port 8080 and runs as `www-data`.
+- One container runs everything with s6-overlay: NGINX, PHP-FPM, `queue:work`, `schedule:work`,
+  Caddy and `fp-ready` (`deploy/docker/s6-rc.d`). The migrations run before s6 starts the
+  services (`AUTORUN_ENABLED=true`). `FP_QUEUE_WORKER=false` or `FP_SCHEDULER=false` turns off one
+  worker. `fp-ready` waits for `/up`, then prints the last lines of the boot:
+  `✓ Feedback Pilgrim is ready (Ns)` and `→ Open <setup URL or app URL>`.
+- Defaults of the image: SQLite in `/data/database.sqlite` (WAL, `busy_timeout` 5000,
+  `synchronous` normal, `IMMEDIATE` transactions, from `DB_*` variables), and the `database`
+  cache, session and queue drivers. Their tables come from
+  `2026_11_25_000100_create_database_driver_tables`. MySQL and Redis stay supported through the
+  normal `DB_*`, `REDIS_*` and `*_DRIVER` variables.
+- `/data` volume: the SQLite file, `.secrets/app_key`, `storage/app` (the image links
+  `storage/app` to `/data/storage/app`) and `caddy/` (certificates).
+  `deploy/docker/entrypoint.d/20-feedbackpilgrim-data.sh` runs before `50-laravel-automations`.
+  It makes the folders, the `APP_KEY` file (mode 600, one time) and the empty SQLite file.
+- Caddy — when `APP_DOMAIN` is set (`CADDY_ENABLED=auto`), Caddy serves ports 80 and 443 with
+  on-demand TLS and proxies to NGINX on 8080. Before each certificate it calls `/caddy/ask`
+  (`CaddyAskController`), which answers 200 only for the app host, `APP_DOMAIN` and the subdomain
+  of a client with an active user. The app always trusts `127.0.0.1` and `::1` as proxies
+  (`config/trustedproxy.php`). The image keeps NGINX and PHP-FPM instead of FrankenPHP, so that
+  the PHP runtime of existing installs does not change.
+- Schema dumps — `database/schema/sqlite-schema.sql` and `mysql-schema.sql` (made with
+  `schema:dump`, no `--prune`). `scripts/check-schema-dump.sh` and the `schema-dump` CI job make
+  sure that they match the migrations. The image has `/var/www/.sqliterc` with
+  `synchronous=NORMAL`, so the `sqlite3` client loads the dump in 0.2 s. The image has
+  `/etc/mysql/conf.d/feedbackpilgrim-client.cnf` (`deploy/docker/mysql-client.cnf`) with
+  `ssl-verify-server-cert = 0` for the `mysql` and `mysqldump` clients only. Thus the MariaDB 11.8
+  client loads `mysql-schema.sql` into the compose MySQL 8.4, which has a self-signed
+  certificate. PDO does not read the file. `deploy/README.md` tells why the check is off.
+- The SQLite email columns (`users.email`, `contacts.email`) use `COLLATE NOCASE`, like the
+  case-insensitive collation of MySQL (`2026_11_25_000200_make_emails_case_insensitive_on_sqlite`,
+  no change on MySQL). The migration runs outside a transaction, so the table rebuild can turn
+  off the foreign keys.
+- `docker-compose.yml` — one `web` service (the image) and, with the `mysql` profile
+  (`COMPOSE_PROFILES=mysql` in `.env`, or `--profile mysql`), the `mysql` (MySQL 8.4) and `redis`
+  services. `.env` is optional. `web` waits for healthy `mysql` and `redis` only when the
+  profile is active (`required: false`). Its health check has a `start_period` of 300 s, for a
+  first install on MySQL. `web` publishes port `APP_PORT` (8080) on `APP_BIND` (default
+  `127.0.0.1`), so only a proxy on the host reaches it. Caddy is off by default in compose
+  (`CADDY_ENABLED=false`). The volumes are `data` (`/data`) and `storage` (`/data/storage/app`,
+  the uploads volume of older versions).
+- `docker-compose.image.yml` — the same stack as `docker-compose.yml`, but `web` uses the
+  published image `ghcr.io/amedina068/feedbackpilgrim` (tag `FEEDBACKPILGRIM_VERSION`, default
+  `latest`) and does not build. Change both files together.
 - `.github/workflows/docker-publish.yml` — runs only on a `v*` tag. It builds the `Dockerfile`
-  for `linux/amd64` and `linux/arm64` and pushes it to GHCR. `.github/workflows/ci.yml` runs
-  Pint, the PHP tests (SQLite in memory), Larastan (`composer analyse`), `composer audit --locked`,
+  for `linux/amd64` and `linux/arm64` and pushes it to GHCR with the tags `x.y.z`, `x.y`, `x` and
+  `latest`. `.github/workflows/ci.yml` runs
+  Pint, the PHP tests on SQLite in memory and on MySQL 8.4 (a matrix), the schema dump check
+  (SQLite and MySQL), Larastan (`composer analyse`), `composer audit --locked`,
   the JS build with the node:test JS tests, the Vitest unit tests (`npm run test:unit`), the API
   docs drift check, and the Playwright E2E tests (Chromium) on each push to
   `main` and each pull request. If the E2E job fails, it uploads the Playwright report and the
   traces as the `playwright-report` artifact. The jobs cache the Composer and npm downloads
   and need no repository secrets. A new push to a pull request stops the old run of that pull
   request. A push to `main` does not stop an old run.
-- `deploy/docker/entrypoint.d/60-feedbackpilgrim-setup.sh` — the image copies it to
-  `/etc/entrypoint.d`. It acts only when `FP_PREPARE_ON_START=true`, which only `web` sets. It
-  runs `fp:install --prepare` and, while no user exists, prints the setup URL to the log.
 - `deploy/nginx`, `deploy/caddy`, `deploy/systemd`, `deploy/supervisor` — example files for an
   install without Docker (web server, queue worker, scheduler) and for a proxy in front of the
   stack. `deploy/README.md` lists them. Keep their commands equal to the `queue` and
-  `scheduler` services.
+  `scheduler` s6 services of the image.
 - Health checks — the image requests `HEALTHCHECK_PATH=/up`. `bootstrap/app.php` registers
   `/up` (`Illuminate\Foundation\Http\HealthCheck`) in the `using:` callback, because
   `withRouting()` ignores `health:` when `using:` is set. `/up` has no domain, so it answers on
-  any host. The workers use `healthcheck-queue` and `healthcheck-schedule`.
+  any host. The image health check uses `/up` on `127.0.0.1:8080`.
 - `optimize` caches the routes, so route names must be unique. The Public API resource routes
   use the `public-api.` name prefix (`routes/public-api.php`). `tests/Feature/RouteNamesTest`
   guards this.
-- Uploads live in the `storage` volume (`storage/app`). Logs go to `stderr` (`LOG_STACK=stderr`
-  in the image).
+- Uploads live in `/data/storage/app`. Logs go to `stderr` (`LOG_STACK=stderr` in the image).
 
 ## Testing
 

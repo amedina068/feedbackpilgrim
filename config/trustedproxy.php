@@ -55,8 +55,14 @@ return [
     |
     */
 
-    'proxies' => $fromEnv === ''
-        ? $cloudflare
-        : array_values(array_filter(array_map('trim', explode(',', $fromEnv)), fn (string $proxy): bool => $proxy !== '')),
+    // The loopback addresses are always trusted. Only a process on the same
+    // host can use them, for example the Caddy server in the Docker image.
+    'proxies' => array_values(array_unique([
+        ...($fromEnv === ''
+            ? $cloudflare
+            : array_filter(array_map('trim', explode(',', $fromEnv)), fn (string $proxy): bool => $proxy !== '')),
+        '127.0.0.1',
+        '::1',
+    ])),
 
 ];

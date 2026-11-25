@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\InstanceUrl;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Laravel\Sanctum\Http\Middleware\AuthenticateSession;
@@ -18,11 +19,12 @@ return [
     |
     */
 
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
-        '%s%s',
-        'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
-        Sanctum::currentApplicationUrlWithPort()
-    ))),
+    // Not set: the local hosts, the app host, APP_DOMAIN and *.APP_DOMAIN,
+    // each with the port of APP_URL.
+    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS') ?: InstanceUrl::statefulDomains(
+        $appUrl = InstanceUrl::url(env('APP_URL'), env('APP_DOMAIN')),
+        InstanceUrl::domain(env('APP_DOMAIN'), $appUrl),
+    )),
 
     /*
     |--------------------------------------------------------------------------

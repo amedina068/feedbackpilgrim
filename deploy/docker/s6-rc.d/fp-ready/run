@@ -1,0 +1,29 @@
+#!/command/with-contenv sh
+# Prints the last lines of the boot: the boot time and the URL to open.
+# It waits until /up answers, so the web server, the queue worker and the
+# scheduler run when it prints.
+cd /var/www/html || exit 1
+
+until curl --silent --fail --output /dev/null http://127.0.0.1:8080/up; do
+    sleep 0.2
+done
+
+# Give the queue worker and the scheduler time to print their start lines.
+sleep 1
+
+# The seconds since the container started (the start time of PID 1).
+fp_elapsed=$(awk -v hz="$(getconf CLK_TCK)" -v start="$(cut -d' ' -f22 /proc/1/stat)" \
+    '{ printf "%d", $1 - start / hz }' /proc/uptime)
+
+fp_url=$(php artisan fp:setup-url --no-ansi 2>/dev/null)
+
+case "$fp_url" in
+    http://* | https://*) ;;
+    *) fp_url=$(php -r 'require "vendor/autoload.php"; $app = require "bootstrap/app.php"; $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); echo config("app.url");') ;;
+esac
+
+echo ""
+echo "✓ Feedback Pilgrim is ready (${fp_elapsed}s)"
+echo "→ Open ${fp_url}"
+
+exec sleep infinity

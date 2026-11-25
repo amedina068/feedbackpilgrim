@@ -3,12 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 /**
@@ -147,7 +145,6 @@ class UserPasswordCommandTest extends TestCase
     public function test_it_ends_the_database_sessions_of_the_user(): void
     {
         config(['session.driver' => 'database']);
-        $this->createSessionsTable();
 
         $user = User::factory()->create(['email' => 'lost@example.com']);
         $other = User::factory()->create();
@@ -176,17 +173,5 @@ class UserPasswordCommandTest extends TestCase
             'email' => 'lost@example.com',
             '--password' => 'a-long-password-1',
         ])->expectsOutputToContain('The "redis" session driver')->assertSuccessful();
-    }
-
-    private function createSessionsTable(): void
-    {
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
-        });
     }
 }

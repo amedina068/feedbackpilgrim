@@ -8,7 +8,6 @@ use App\Models\Contact;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\ViewErrorBag;
 use Tests\TestCase;
@@ -23,14 +22,6 @@ class DeactivatedUserTest extends TestCase
     use RefreshDatabase;
 
     private Client $client;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Redis::shouldReceive('get')->andReturn(null);
-        Redis::shouldReceive('set')->andReturn(true);
-    }
 
     private function user(array $attributes = []): User
     {

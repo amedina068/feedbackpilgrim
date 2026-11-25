@@ -1,0 +1,49 @@
+#!/command/with-contenv sh
+# Caddy gives automatic HTTPS on ports 80 and 443 when APP_DOMAIN is set.
+# It gets one certificate for each host on demand: the app host, APP_DOMAIN
+# and the subdomain of each project. Before each certificate, Caddy asks
+# /caddy/ask, which allows only the hosts that the app serves.
+#
+# CADDY_ENABLED: "auto" (the default) starts Caddy only when APP_DOMAIN is
+# set. "true" always starts it. "false" never starts it, for example behind
+# your own proxy. ACME_EMAIL is optional. Let's Encrypt uses it for notices.
+
+case "${CADDY_ENABLED:-auto}" in
+    true) ;;
+    false) exec sleep infinity ;;
+    *) [ -n "$APP_DOMAIN" ] || exec sleep infinity ;;
+esac
+
+export XDG_DATA_HOME=/data/caddy
+export XDG_CONFIG_HOME=/data/caddy/config
+
+caddyfile=/tmp/Caddyfile
+
+{
+    echo "{"
+    echo "    admin off"
+    [ -n "$ACME_EMAIL" ] && echo "    email $ACME_EMAIL"
+    echo "    on_demand_tls {"
+    echo "        ask http://127.0.0.1:8080/caddy/ask"
+    echo "    }"
+    echo "    log {"
+    echo "        level WARN"
+    echo "    }"
+    echo "}"
+    echo ""
+    echo "https:// {"
+    echo "    tls {"
+    echo "        on_demand"
+    echo "    }"
+    echo "    request_body {"
+    echo "        max_size 100MB"
+    echo "    }"
+    echo "    reverse_proxy 127.0.0.1:8080"
+    echo "}"
+    echo ""
+    echo "http:// {"
+    echo "    redir https://{host}{uri} permanent"
+    echo "}"
+} > "$caddyfile"
+
+exec caddy run --config "$caddyfile" --adapter caddyfile

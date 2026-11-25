@@ -7,7 +7,6 @@ use App\Models\Contact;
 use App\Models\Testimonial;
 use App\Support\WidgetContactToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Js;
 use Tests\TestCase;
 
@@ -102,8 +101,6 @@ class TestimonialSubmissionTest extends TestCase
 
     public function test_init_gives_a_testimonial_url_with_a_contact_token_and_no_contact_id(): void
     {
-        Redis::shouldReceive('get')->andReturn(null);
-        Redis::shouldReceive('set')->andReturn(true);
         $client = Client::factory()->create(['require_identity_verification' => false]);
 
         $url = $this->withToken($client->publishable_key)->postJson('/api/v1/init', [
