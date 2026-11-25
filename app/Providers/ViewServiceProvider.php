@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\Client;
+use App\Support\DashboardBanners;
+use App\Support\DashboardNavigation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -77,13 +79,21 @@ class ViewServiceProvider extends ServiceProvider
             $currentSection = collect($sections)
                 ->first(fn (array $section) => request()->is("{$section['path']}*"));
 
+            $extensionItems = $this->extensionNavigationItems();
+            $currentExtensionItem = collect($extensionItems)->firstWhere('active', true);
+
             $view->with([
                 'clients' => $clients,
                 'client' => $client,
                 'contactUrl' => $contactUrl,
                 'sidebarItems' => $sidebarItems,
-                'currentSection' => $currentSection['title'] ?? $client->name,
+                'extensionItems' => $extensionItems,
+                'currentSection' => $currentSection['title'] ?? $currentExtensionItem['label'] ?? $client->name,
             ]);
+        });
+
+        View::composer('layouts.app', function (\Illuminate\View\View $view) {
+            $view->with('dashboardBanners', app(DashboardBanners::class)->items(Auth::user()));
         });
 
         View::composer('layouts.public', function (\Illuminate\View\View $view) {
@@ -92,5 +102,27 @@ class ViewServiceProvider extends ServiceProvider
             View::share('client', $client);
             View::share('clientDomain', $clientDomain);
         });
+    }
+
+    /**
+     * The links from DashboardNavigation that the current user can see. A
+     * link to a path of this app is active when the request is on that path
+     * or below it.
+     *
+     * @return list<array{label: string, url: string, active: bool}>
+     */
+    private function extensionNavigationItems(): array
+    {
+        return array_map(function (array $item): array {
+            $path = str_starts_with($item['url'], '/') && ! str_starts_with($item['url'], '//')
+                ? trim((string) parse_url($item['url'], PHP_URL_PATH), '/')
+                : '';
+
+            return [
+                'label' => $item['label'],
+                'url' => $item['url'],
+                'active' => $path !== '' && request()->is($path, "{$path}/*"),
+            ];
+        }, app(DashboardNavigation::class)->items(Auth::user()));
     }
 }

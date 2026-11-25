@@ -442,6 +442,59 @@ back to it. There is no billing. The migration `2026_11_16_000001_complete_prici
 moves users from the old `pricing` step to `completed`. Instances that ran the old Cashier
 migrations keep the unused `subscriptions` tables and `users` billing columns.
 
+## Extension points
+
+A hosted edition or a plugin can limit access and add dashboard parts without a change to the
+core. It installs as a Composer package with a service provider. With no such package, the core
+has no limits and the dashboard markup does not change.
+
+### Entitlements
+
+`App\Contracts\Entitlements` decides what a dashboard user can do:
+
+```php
+public function accessRedirect(User $user): ?string;      // null, or the URL to send the user to
+public function canCreateProject(User $user): bool;        // true when the user can create one more Client
+public function projectLimitMessage(User $user): string;   // the text when canCreateProject() is false
+```
+
+`AppServiceProvider` binds `App\Support\UnlimitedEntitlements` with `singletonIf()`. Laravel
+registers the providers of discovered packages before the app providers, so a package binding
+that comes first stays. A provider that registers later replaces the default with `singleton()`.
+
+The core uses the binding in these places:
+
+- `HasAccessToAppMiddleware` (alias `hasAccess`) first sends a user who has not finished
+  onboarding to `onboarding/project`. Then it redirects to the URL from `accessRedirect()`.
+  A package registers its own pages without `hasAccess`, so that these pages stay open.
+- `OnboardingClientController::create` shows `projectLimitMessage()` and a link to the
+  dashboard in place of the form when `canCreateProject()` is false. `store` returns 403 and
+  creates no Client. The onboarding routes are outside `hasAccess`, so a new user with no
+  project always reaches the form. `canCreateProject()` decides if that user can create one.
+- The core never asks the binding about the owner of the instance (`User::isOwner()`). The owner
+  always opens the dashboard and the admin area, and can create projects.
+- `CreateInstanceOwner` (the setup page and `fp:install`) does not use the binding. The first
+  owner and the first project of an instance are never limited.
+
+No other path creates a Client. The REST API, the MCP tools and the admin area read and change
+the data of a Client, but they do not create one.
+
+### Dashboard navigation and banners
+
+Add these items in the `boot()` method of a service provider. Both registries are singletons.
+
+- `App\Support\DashboardNavigation::add(string $label, string $url, ?callable $visible = null)`
+  adds a link after the core links in `layouts/navigation-links`. The sidebar and the mobile
+  menu both show it. `$visible` gets the `User` and returns a bool. A link to a path of this
+  app gets `aria-current="page"` on that path and below it.
+- `App\Support\DashboardBanners::add(callable $resolver)` adds a one-line notice at the top of
+  `layouts/app`. The resolver gets the `User` and returns null or
+  `['message' => string, 'url' => ?string, 'link' => ?string]`. The URL must start with `/`,
+  `http://` or `https://`. The default link text is "Details".
+
+Blade escapes each label, message and link. In the two layouts, the directives for these items
+start at column 0. Thus an empty registry adds no bytes to the page.
+
 ## Frontend
 
 ### Build targets
@@ -673,7 +726,8 @@ app/
   Actions/                 shared inner logic for REST API + MCP (Posts/ ReleaseNotes/ Contacts/ Testimonials/ Tags/ + Concerns/) · SendingDomains/
   Rules/Public/            single-source validation rule sets per resource
   Mcp/                     Servers/PublicServer · Tools/** (21 tools) · Concerns/ · Support/ (ToolResponse, ToolCatalog)
-  Support/                 ClientContext, ContactPresenter, ContactUpsertResult, ApiReference, MailSender
+  Contracts/               Entitlements (extension point, see "Extension points")
+  Support/                 ClientContext, ContactPresenter, ContactUpsertResult, ApiReference, MailSender · UnlimitedEntitlements, DashboardNavigation, DashboardBanners
   Models/                  domain entities (Client is tenant root)
   Services/                DashboardMetricsService, WeeklyReportService, SesSendingDomainsService
   Traits/                  MetricsCalculations, LogsActivity, NotifiesUsers, BelongsToClient

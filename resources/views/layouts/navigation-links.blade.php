@@ -43,6 +43,11 @@
         </x-sidebar-link>
       </li>
     @endif
+@foreach ($extensionItems as $item) {{-- Links from App\Support\DashboardNavigation. The directives start at column 0, so an empty list adds no bytes. --}}
+    <li>
+      <x-sidebar-link :href="$item['url']" :active="$item['active']">{{ $item['label'] }}</x-sidebar-link>
+    </li>
+@endforeach
   </ul>
 
   <x-sidebar-link href="/profile" :active="request()->is('profile*')" class="mt-auto">

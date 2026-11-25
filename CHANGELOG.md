@@ -10,6 +10,7 @@ This file lists the changes to the code for each release. The release notes for 
 
 ### Added
 
+- Extension points for a hosted edition or a plugin: `App\Contracts\Entitlements` can limit dashboard access and new projects, and `DashboardNavigation` and `DashboardBanners` add dashboard links and notices. With no extension, nothing changes.
 - The MCP tool `list_posts` accepts `board_id`, like `GET /api/public/v1/posts`.
 - A **Token name** field on the API Tokens settings page. The token list shows the name, so the user can tell the tokens apart.
 - The OpenAPI spec in `docs/api/openapi.yaml`, with the widget `init` call and the key that each operation needs. A Postman collection and environment are in `docs/api/`.

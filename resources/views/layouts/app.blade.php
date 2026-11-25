@@ -25,6 +25,18 @@
 
           <main class="py-10 lg:pl-72">
             <div class="px-4 sm:px-6 lg:px-8">
+@if ($dashboardBanners !== []) {{-- Banners from App\Support\DashboardBanners. The directives start at column 0, so an empty list adds no bytes. --}}
+              <section aria-label="Notices" class="mb-6 flex flex-col gap-y-2">
+                @foreach ($dashboardBanners as $banner)
+                  <p class="rounded-lg bg-fp-accent/10 px-4 py-3 text-sm text-fp-hi ring-1 ring-fp-accent/20">
+                    {{ $banner['message'] }}
+                    @if ($banner['url'] !== null)
+                      <a href="{{ $banner['url'] }}" class="font-medium text-fp-accent hover:text-fp-accent-hover">{{ $banner['link'] }}</a>
+                    @endif
+                  </p>
+                @endforeach
+              </section>
+@endif
               <x-flash class="mb-6" />
               {{ $slot }}
             </div>
