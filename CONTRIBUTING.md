@@ -165,6 +165,22 @@ Playwright starts the app for the tests. First it writes `.env.e2e` from `.env.e
 - Before you ask for a review, make sure that `php artisan test`, `vendor/bin/pint --test` and `npm run build` pass.
 - Write the follow-up work in the pull request description.
 
+## Pull request titles
+
+The title of each pull request must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). The `pr-title` check fails when the title does not follow it.
+
+Use one of these types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore` or `revert`. The scope in parentheses is optional. Examples:
+
+- `feat: add a webhook for new comments`
+- `fix(widget): keep the session after a page reload`
+- `docs: explain the backup of the SQLite file`
+
+GitHub makes the release notes from the titles of the merged pull requests. A clear title gives a clear release note.
+
+## Triage
+
+Each new issue gets the `needs-triage` label. The maintainer reads the issue, adds a type label (for example `bug`, `enhancement` or `question`) and removes `needs-triage`.
+
 ## Release notes
 
 If a pull request has a change that users can see, add a `## Release note` section to its body. Write one or two short sentences in plain text, not Markdown or HTML. Tell the user what changed.

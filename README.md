@@ -1,5 +1,8 @@
 # Feedback Pilgrim
 
+[![CI](https://github.com/amedina068/feedbackpilgrim/actions/workflows/ci.yml/badge.svg)](https://github.com/amedina068/feedbackpilgrim/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/amedina068/feedbackpilgrim/badge)](https://scorecard.dev/viewer/?uri=github.com/amedina068/feedbackpilgrim)
+
 A self-hosted feedback board. Your customers post feature requests, vote and comment on a public site for each product. You sort the requests by the revenue of the customers who ask for them.
 
 ```bash
