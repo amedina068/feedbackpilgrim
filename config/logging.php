@@ -1,5 +1,6 @@
 <?php
 
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -71,6 +72,15 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
+        ],
+
+        // The audit log of the instance-admin MCP server: one JSON line for each tool call.
+        'mcp-admin' => [
+            'driver' => 'daily',
+            'path' => env('MCP_ADMIN_AUDIT_LOG', storage_path('logs/mcp-admin.log')),
+            'level' => 'info',
+            'days' => 90,
+            'formatter' => JsonFormatter::class,
         ],
 
         'daily' => [

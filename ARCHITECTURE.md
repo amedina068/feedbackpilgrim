@@ -46,8 +46,16 @@ naming convention encodes which surface a controller serves.
 | **Admin dashboard** | App host (the `APP_URL` host, `config('app.host')`) | `auth` (User) | `PostController`, `ReleaseNoteController`, … | `routes/web.php`, `routes/auth.php` |
 | **Public client site** | Client subdomain | `auth:contact` (Contact) or none | `Client*` prefix (`ClientPostController`, `ClientRoadmapController`) | `routes/web.php` |
 | **Embeddable widgets** | Client subdomain | none | `Iframe*` prefix (`IframeReleaseNoteController`) | `routes/iframe.php` |
-| **Public REST API** | Main app domain, `/api/public/v1` | Sanctum token + `api_client` | `Api\V1\Public\*` | `routes/public-api.php` |
-| **MCP server** | Main app domain, `/mcp` | Sanctum bearer + `api_client` + `throttle:mcp` | `App\Mcp\*` (`PublicServer`, `*Tool`) | `routes/ai.php` |
+| **Public REST API** | Main app domain, `/api/public/v1` | Sanctum token with `api` + `api_client` | `Api\V1\Public\*` | `routes/public-api.php` |
+| **MCP server** | Main app domain, `/mcp` | Sanctum bearer with `mcp:read` or `mcp:write` + `api_client:mcp` + `throttle:mcp` | `App\Mcp\*` (`PublicServer`, `*Tool`) | `routes/ai.php` |
+
+**Instance-admin MCP server.** `App\Mcp\Servers\InstanceAdminServer` operates the whole
+instance (status, doctor, users, projects, tokens, settings, queue, errors, test email). It runs
+over stdio (`Mcp::local('fp-admin')`, started with `php artisan mcp:start fp-admin`, for example
+`ssh <host> docker exec -i <container> php artisan mcp:start fp-admin`). Only when
+`MCP_ADMIN_ENABLED=true` does it also answer at `/mcp/admin`. That route uses
+`EnsureInstanceAdminToken`: an active owner, a token with exactly `["instance:admin"]` (never
+`*`), and an expiry of 7 days or less. See "Agent-first surface".
 
 **Setup page and instance admin.** Two small surfaces on the app domain serve the operator.
 `SetupController` (`/setup`) creates the first owner while the `users` table is empty.
@@ -157,6 +165,13 @@ returns `docs/api/postman_collection.json`. The API Tokens settings page links t
   attaches it to the request; 401 if absent, or if the token user is not in `client_user` for
   the token client. `ClientContext::fromToken()` is the single
   token→identity resolver for both transports (no controller reads the raw token directly).
+  It also checks the abilities: the REST API needs `api`, and `/mcp` needs `mcp:read` or
+  `mcp:write` (403 `insufficient_ability` without them). Each MCP tool then needs `mcp:read`
+  (tools with `readOnlyHint`) or `mcp:write`. A tool without its ability does not register for
+  the token (`ResolvesClientContext::shouldRegister()`), so `tools/list` hides it and a call
+  gets "tool not found". Tokens from before the abilities have `*`, which Sanctum treats as
+  every ability, so they keep working. `App\Support\ApiTokens` creates tokens: product tokens
+  get only `mcp:read`, `mcp:write` and `api`, and an optional `expires_at`.
 
 ### Two authenticatables / two guards
 
@@ -418,10 +433,59 @@ thin service layer for metrics and shared traits for cross-cutting concerns.
   (`fp:weekly`) every Monday 09:00. It reports the previous week, Monday to Sunday. Other commands: `SyncContactAttributes`
   (`fp:sync-contact-attributes`), `SetupTestimonialRatingSettings`, `InstallCommand` (`fp:install`,
   with `--prepare` and `--promote`), `SetupUrlCommand` (`fp:setup-url`), `UserListCommand`
-  (`fp:user:list`) and `UserPasswordCommand` (`fp:user:password`).
+  (`fp:user:list`), `UserPasswordCommand` (`fp:user:password`), and the agent commands in
+  "Agent-first surface".
+  The `fp:heartbeat` closure runs every minute. It writes the scheduler heartbeat to the cache
+  and queues `RecordQueueHeartbeat`, which writes the queue heartbeat (`App\Support\Heartbeats`).
   `sending-domains:check` (`CheckSendingDomains`) runs every 10 minutes with
   `withoutOverlapping()`. It checks pending domains, and verified domains that had no check in
   the last 24 hours. It skips failed domains.
+
+## Agent-first surface
+
+An AI agent can install, check and run an instance without a browser.
+
+**The command contract.** Each `fp:` command takes `--json` and `--no-interaction`
+(`App\Console\Concerns\InteractsWithAgents`). With `--json`, stdout holds one JSON object:
+`{"ok", "command", "schema": 1, "data", "errors": [{"code", "message", "fix"}]}`. Messages go to
+stderr. The exit codes are 0 (success or no change), 1 (a check or an action failed), 2 (bad
+input) and 3 (conflict) (`App\Console\Concerns\AgentExit`).
+
+| Command | Purpose |
+|---------|---------|
+| `fp:install --name --email [--project] [--subdomain] [--with-token=<name>]` | Creates the owner and the first project. It needs no password. It returns a one-time `login_url`. With `--with-token`, it also returns a product token and a `connect` object (`claude mcp add` and `codex mcp add` lines). A second run returns `"status": "exists"` and exits 0. Another email on a used instance exits 3. `--password` and `--client-name` still work but are deprecated. |
+| `fp:status` | Version, app URL, database driver and reachability, pending migrations, queue and scheduler heartbeats, storage link, mailer, MCP URLs, owner. Exits 1 when the database is not reachable. |
+| `fp:doctor [--fix]` | A list of `{id, status: ok\|warn\|fail, message, fix, fixed}` (`App\Support\InstanceDoctor`). `--fix` runs only safe fixes (the storage link). It never runs migrations. |
+| `fp:token:create --user --name [--project] [--abilities] [--expires] [--admin]` | A product token, or with `--admin` an owner token with only `instance:admin` (1 day by default, 7 days at most). |
+| `fp:token:list [--user]`, `fp:token:revoke <id>` | List (never the token value, `legacy` for `*`) and revoke. |
+| `fp:mcp:connect --client=claude\|codex\|cursor\|json [--token=new]` | The connect command or config (`App\Support\McpConnect`). The lines read the token from `FP_TOKEN`. |
+
+`fp:setup-url`, `fp:user:list`, `fp:user:password` and `fp:weekly` also take `--json`. Without
+`--json`, `fp:setup-url` still prints only the URL, because the Docker entrypoint reads it.
+
+**One-time login link.** `App\Support\LoginLink` makes a temporary signed URL to
+`GET /login/link/{user}` (`LoginLinkController`). The URL holds a hash of the remember token of
+the user. The first use rotates that token, so the link works one time. A logout and
+`fp:user:password` also end all open links. After the login, the session key
+`login_link.can_set_password` lets the user set a password on the profile page without the
+current one, one time. `fp:install` links work for 60 minutes. `invite-user` links work for 7 days.
+
+**Instance-admin MCP tools.** `get-instance-status`, `run-doctor`, `list-users`, `invite-user`,
+`list-projects`, `create-project`, `list-api-tokens`, `create-api-token` (product abilities
+only), `revoke-api-token`, `get-settings`, `set-setting` (allowlist: `registration_mode`),
+`get-queue-health`, `retry-failed-jobs`, `read-recent-errors` (first line of each error, secrets
+removed) and `send-test-email`. Each tool has `readOnlyHint` or `destructiveHint`. A destructive
+tool returns a preview and changes nothing until a second call with `confirm: true`.
+`App\Mcp\Concerns\AuditsAdminCalls` writes one JSON line for each call to the `mcp-admin` log
+channel (`storage/logs/mcp-admin-*.log`, 90 days), with the secret arguments removed. The
+`activity_log` table is not used, because each of its rows needs a project and the project
+dashboard shows it. These actions stay CLI-only: create the owner, promote or demote a user,
+rotate keys, revoke all tokens, delete data.
+
+**Discovery.** `GET /llms.txt` and `GET /skill.md` (`AgentDocsController`) render on each
+request. `LlmsTxtGenerator` reads the guides and `public/docs/openapi.json`, and it has an
+"Install with an agent" section. `SkillFileGenerator` adds frontmatter to
+`PublicServer::WORKFLOW`, the same text that the MCP server sends as its instructions.
 
 ## Onboarding
 

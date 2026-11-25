@@ -10,8 +10,12 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Description('Reply to a post as the user that owns the API token. The comment is attributed to that user\'s admin contact inside the authenticated client, and the post author is notified by email. Not idempotent — calling again adds another comment, so avoid blind retries. Returns the created comment with its contact.')]
+#[IsReadOnly(false)]
+#[IsDestructive(false)]
 class CreatePostCommentTool extends Tool
 {
     use ResolvesClientContext;

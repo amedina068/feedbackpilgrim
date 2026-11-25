@@ -9,15 +9,23 @@
         </p>
     </header>
 
+    @if (session(\App\Support\LoginLink::SESSION_KEY))
+        <div role="status" class="mt-4 rounded-lg bg-fp-accent/10 px-4 py-3 text-sm text-fp-accent ring-1 ring-fp-accent/20">
+            {{ __('You logged in with a one-time link. Set a password now, so that you can log in again.') }}
+        </div>
+    @endif
+
     <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
         @csrf
         @method('put')
 
-        <div>
-            <x-input-label for="update_password_current_password" :value="__('Current Password')" />
-            <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
-            <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
-        </div>
+        @unless (session(\App\Support\LoginLink::SESSION_KEY))
+            <div>
+                <x-input-label for="update_password_current_password" :value="__('Current Password')" />
+                <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
+                <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
+            </div>
+        @endunless
 
         <div>
             <x-input-label for="update_password_password" :value="__('New Password')" />

@@ -10,8 +10,10 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Description('Fetch a single feedback post by id for the authenticated client, including contact, tags, votes, and comments. Returns not-found if the post belongs to another client. Use to inspect one post in detail.')]
+#[IsReadOnly]
 class GetPostTool extends Tool
 {
     use ResolvesClientContext;

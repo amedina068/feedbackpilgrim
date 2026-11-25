@@ -62,11 +62,11 @@ class InstallCommandTest extends TestCase
             ->assertSuccessful();
     }
 
-    public function test_install_refuses_to_run_when_a_user_exists(): void
+    public function test_install_reports_a_conflict_when_another_user_exists(): void
     {
         User::factory()->create();
 
-        $this->artisan('fp:install', $this->installOptions())->assertFailed();
+        $this->artisan('fp:install', $this->installOptions())->assertExitCode(3);
 
         $this->assertDatabaseMissing('users', ['email' => 'jane@example.com']);
         $this->assertDatabaseCount('clients', 0);
@@ -74,14 +74,14 @@ class InstallCommandTest extends TestCase
 
     public function test_install_rejects_a_short_password(): void
     {
-        $this->artisan('fp:install', $this->installOptions(['--password' => 'short']))->assertFailed();
+        $this->artisan('fp:install', $this->installOptions(['--password' => 'short']))->assertExitCode(2);
 
         $this->assertDatabaseCount('users', 0);
     }
 
     public function test_install_rejects_an_invalid_subdomain(): void
     {
-        $this->artisan('fp:install', $this->installOptions(['--subdomain' => 'Not A Subdomain']))->assertFailed();
+        $this->artisan('fp:install', $this->installOptions(['--subdomain' => 'Not A Subdomain']))->assertExitCode(2);
 
         $this->assertDatabaseCount('users', 0);
         $this->assertDatabaseCount('clients', 0);
@@ -89,7 +89,7 @@ class InstallCommandTest extends TestCase
 
     public function test_install_rejects_an_invalid_email(): void
     {
-        $this->artisan('fp:install', $this->installOptions(['--email' => 'not-an-email']))->assertFailed();
+        $this->artisan('fp:install', $this->installOptions(['--email' => 'not-an-email']))->assertExitCode(2);
 
         $this->assertDatabaseCount('users', 0);
     }
@@ -136,7 +136,6 @@ class InstallCommandTest extends TestCase
         $this->artisan('fp:install')
             ->expectsQuestion('Owner name', 'Jane Owner')
             ->expectsQuestion('Owner email', 'jane@example.com')
-            ->expectsQuestion('Owner password', 'correct-horse-battery')
             ->expectsQuestion('Project name', 'Acme')
             ->expectsQuestion('Project subdomain', 'acme')
             ->assertSuccessful();
