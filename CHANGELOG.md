@@ -81,6 +81,7 @@ This file lists the changes to the code for each release. The release notes for 
 - `GET /posts?sort_by=<unknown value>` on the public site returned 500, and the value went into the SQL `ORDER BY`. The page now accepts only its four sorts. Another value shows the newest posts.
 - The project form refused an empty website, because the `domain` rule referred to itself. An empty website now removes the "Back to" link of the public site.
 - After an `APP_KEY` change, the widget settings page, the **Regenerate secret** button and each widget `init` call with a `userHash` returned 500. The page now says that the app cannot read the secret, the button makes a new secret, and the widget refuses the hash with 403.
+- On the contact edit page, a click on **Remove field** for one custom field also hid the next field, and a save lost its value. Each row now has a stable ID, so only the selected row goes away. A new row also gets a field name that no other row uses.
 
 ### Security
 
