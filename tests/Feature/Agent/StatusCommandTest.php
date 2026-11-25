@@ -24,7 +24,7 @@ class StatusCommandTest extends TestCase
             'storage_link', 'mail', 'mcp', 'owner_exists', 'setup_url',
         ], array_keys($data));
 
-        $this->assertSame('sqlite', $data['database']['driver']);
+        $this->assertSame(config('database.connections.'.config('database.default').'.driver'), $data['database']['driver']);
         $this->assertTrue($data['database']['reachable']);
         $this->assertSame(0, $data['database']['pending_migrations']);
         $this->assertSame('sync', $data['queue']['connection']);
@@ -80,7 +80,7 @@ class StatusCommandTest extends TestCase
     public function test_status_without_json_prints_a_table(): void
     {
         $this->artisan('fp:status')
-            ->expectsOutputToContain('sqlite, reachable')
+            ->expectsOutputToContain(config('database.connections.'.config('database.default').'.driver').', reachable')
             ->expectsOutputToContain('Pending migrations')
             ->assertSuccessful();
     }
