@@ -1,0 +1,9 @@
+#!/command/with-contenv sh
+# The queue worker. Set FP_QUEUE_WORKER=false to run it in another container.
+cd /var/www/html || exit 1
+
+if [ "${FP_QUEUE_WORKER:-true}" = "false" ]; then
+    exec sleep infinity
+fi
+
+exec php artisan queue:work --tries=3 --max-time=3600

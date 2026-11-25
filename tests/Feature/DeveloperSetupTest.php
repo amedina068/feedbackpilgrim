@@ -41,15 +41,16 @@ class DeveloperSetupTest extends TestCase
         );
     }
 
-    public function test_deploy_examples_run_the_workers_of_the_compose_file(): void
+    public function test_deploy_examples_run_the_workers_of_the_docker_image(): void
     {
-        $compose = file_get_contents(base_path('docker-compose.yml'));
+        $image = file_get_contents(base_path('deploy/docker/s6-rc.d/queue/run'))
+            .file_get_contents(base_path('deploy/docker/s6-rc.d/scheduler/run'));
         $systemd = file_get_contents(base_path('deploy/systemd/feedbackpilgrim-queue.service'))
             .file_get_contents(base_path('deploy/systemd/feedbackpilgrim-scheduler.service'));
         $supervisor = file_get_contents(base_path('deploy/supervisor/feedbackpilgrim.conf'));
 
         foreach (['queue:work --tries=3', 'schedule:work'] as $command) {
-            $this->assertStringContainsString('"'.str_replace(' ', '", "', $command).'"]', $compose);
+            $this->assertStringContainsString("artisan {$command}", $image);
             $this->assertStringContainsString("artisan {$command}\n", $systemd);
             $this->assertStringContainsString("artisan {$command}\n", $supervisor);
         }
