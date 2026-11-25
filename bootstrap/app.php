@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CaddyAskController;
 use App\Http\Middleware\AdminContactPublicSiteLoginMiddleware;
 use App\Http\Middleware\AllowIframeMiddleware;
 use App\Http\Middleware\ApiClientMiddleware;
@@ -9,6 +10,7 @@ use App\Http\Middleware\HasAccessToAppMiddleware;
 use App\Http\Middleware\IdentifyClientMiddleware;
 use App\Http\Middleware\IdentifyWidgetClientMiddleware;
 use App\Http\Middleware\LogoutDeactivatedUser;
+use App\Http\Middleware\RedirectLoopbackHost;
 use App\Http\Middleware\RedirectToSetup;
 use App\Http\Middleware\RegistrationEnabledMiddleware;
 use App\Http\Middleware\SecurityHeaders;
@@ -31,6 +33,10 @@ return Application::configure(basePath: dirname(__DIR__))
         using: function () {
             // withRouting() ignores "health:" when "using:" is set.
             Route::get('/up', HealthCheck::class);
+
+            // Caddy asks this route before it gets an on-demand TLS
+            // certificate. It answers on any host, like /up.
+            Route::get('/caddy/ask', CaddyAskController::class)->name('caddy.ask');
 
             Route::middleware('api')
                 ->prefix('api/v1')
@@ -59,6 +65,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Authenticated guests (the `guest` middleware) land on the dashboard.
         $middleware->redirectUsersTo('/dashboard');
+
+        // Send 127.0.0.1 and [::1] to the APP_URL host, where the admin
+        // routes are.
+        $middleware->prepend(RedirectLoopbackHost::class);
 
         // Never trim sensitive credential fields.
         $middleware->trimStrings(except: [
