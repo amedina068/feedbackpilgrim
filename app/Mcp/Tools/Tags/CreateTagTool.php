@@ -10,8 +10,12 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Description('Create a tag for the authenticated client. Titles are unique per client. Not idempotent — avoid blind retries.')]
+#[IsReadOnly(false)]
+#[IsDestructive(false)]
 class CreateTagTool extends Tool
 {
     use ResolvesClientContext;

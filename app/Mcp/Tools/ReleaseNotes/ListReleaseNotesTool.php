@@ -10,8 +10,10 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Description('List release notes for the authenticated client, with pagination, search, published filter, tag filter, and sorting. Returns a paginated envelope (title, content, slug, published_at, tags). Use to browse the changelog.')]
+#[IsReadOnly]
 class ListReleaseNotesTool extends Tool
 {
     use ResolvesClientContext;

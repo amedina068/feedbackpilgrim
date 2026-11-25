@@ -10,8 +10,10 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Description('List tags for the authenticated client, with pagination, search, and sorting. Each tag includes counts of posts and contacts. Use to discover available tag titles before filtering other resources by tag.')]
+#[IsReadOnly]
 class ListTagsTool extends Tool
 {
     use ResolvesClientContext;

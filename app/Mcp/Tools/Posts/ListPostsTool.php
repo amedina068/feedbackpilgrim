@@ -10,8 +10,10 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Description('List feedback posts for the authenticated client, with pagination, search, status/board/tag filters, and sorting. Returns a paginated envelope of posts (title, content, status, tags, contact, votes). Use to browse or find feature requests and feedback.')]
+#[IsReadOnly]
 class ListPostsTool extends Tool
 {
     use ResolvesClientContext;

@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\AgentDocsController;
 use App\Http\Controllers\ApiKeyController;
+use App\Http\Controllers\Auth\LoginLinkController;
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\ClientCommentController;
 use App\Http\Controllers\ClientController;
@@ -53,6 +55,13 @@ Route::domain(config('app.host'))->middleware('setupRedirect')->group(function (
     });
 
     require __DIR__.'/auth.php';
+
+    // The one-time login link of fp:install and of the invite-user admin tool.
+    Route::get('login/link/{user}', LoginLinkController::class)->middleware('throttle:10,1')->name('login.link');
+
+    // Machine-readable discovery for agents, built on each request.
+    Route::get('llms.txt', [AgentDocsController::class, 'llms'])->name('llms');
+    Route::get('skill.md', [AgentDocsController::class, 'skill'])->name('skill');
 
     Route::get('/', function () {
         return Auth::check()

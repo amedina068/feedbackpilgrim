@@ -10,8 +10,10 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Description('Fetch a single testimonial by id for the authenticated client, including contact, votes, and comments. Returns not-found if it belongs to another client.')]
+#[IsReadOnly]
 class GetTestimonialTool extends Tool
 {
     use ResolvesClientContext;
