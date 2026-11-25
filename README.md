@@ -2,6 +2,12 @@
 
 Feedback Pilgrim is a self-hosted feedback board. Your customers post feature requests, vote and comment on a public site for each of your products. You sort the requests by the revenue of the customers who ask for them.
 
+## Feedback Pilgrim Cloud
+
+Do not want to run a server? Feedback Pilgrim Cloud is the hosted edition at `https://app.feedbackpilgrim.com`, with a free trial of 14 days and no credit card. Read the [plans](https://feedbackpilgrim.com/pricing), or [start a trial](https://app.feedbackpilgrim.com/register).
+
+The self-hosted edition stays free under the AGPL-3.0 license. The guide below installs it.
+
 ## Features
 
 - Feedback boards with votes, comments, tags and stages.
