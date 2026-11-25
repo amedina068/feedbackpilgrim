@@ -3,9 +3,9 @@
 namespace App\Http\Middleware;
 
 use App\Models\Client;
+use App\Support\ClientHost;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class IdentifyClientMiddleware
@@ -33,27 +33,6 @@ class IdentifyClientMiddleware
 
     private function getClient(Request $request): ?Client
     {
-        $host = $request->getHost();
-
-        if ($host === config('app.host') || $host === config('app.domain')) {
-            return null;
-        }
-
-        if (! Str::endsWith($host, '.'.config('app.domain'))) {
-            return null;
-        }
-
-        return $this->getClientFromSubdomain($host);
-    }
-
-    private function getClientFromSubdomain(string $host): ?Client
-    {
-        $subdomain = Str::beforeLast($host, '.'.config('app.domain'));
-
-        if (in_array($subdomain, Client::RESERVED_SLUGS, true)) {
-            return null;
-        }
-
-        return Client::where('slug', $subdomain)->first();
+        return ClientHost::client($request->getHost());
     }
 }
