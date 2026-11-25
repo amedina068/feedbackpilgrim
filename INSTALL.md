@@ -76,14 +76,17 @@ Read these fields from `data`:
 
 | Field | Use |
 |---|---|
-| `status` | `created` for a new owner. `exists` if an owner exists. Both exit with `0`. |
-| `login_url` | A one-time login link for the human. |
-| `token` | The API token for the MCP server and the REST API. |
-| `connect.claude` | The `claude mcp add` command. |
-| `connect.codex` | The `codex mcp add` command. |
+| `status` | `created` for a new owner. `exists` if this email is already the owner. Both exit with `0`. |
+| `login_url` | A login link for the human. It works one time, for 60 minutes. |
+| `app_url` | The URL of the dashboard. |
+| `token.plain_text` | The API token for the MCP server and the REST API. It has the abilities `mcp:read`, `mcp:write` and `api`. |
+| `connect.env` | The `export FP_TOKEN=...` line. |
+| `connect.claude` | The `claude mcp add` command. It reads the token from `FP_TOKEN`. |
+| `connect.codex` | The `codex mcp add` command. It reads the token from `FP_TOKEN`. |
 
-- If `status` is `exists`, the command makes no new owner and no login link. Ask the human to log in with the existing account.
-- The command does not accept `--password`. The owner sets a password after the first login.
+- If `status` is `exists`, the command makes no new owner and no token. It returns a new `login_url`. To make a token, run the command in `data.next[0]`.
+- If the exit code is `3` with the error code `instance_has_owner`, another email owns the instance. Ask the human for the owner email.
+- The command needs no password. After the first login, the owner can set a password on the profile page.
 
 ## 5. Check the instance
 
@@ -102,14 +105,21 @@ For a short summary of the instance, run `fp:status --json --no-interaction`.
 
 ## 6. Connect the MCP server
 
-Run the `connect.claude` command on the computer where the agent runs, not in the container. For Codex, use `connect.codex`.
+Run the `connect.env` line and the `connect.claude` command on the computer where the agent runs, not in the container:
 
 ```bash
+export FP_TOKEN=<token>
 claude mcp add --transport http feedback-pilgrim https://feedback.example.com/mcp \
-  --header "Authorization: Bearer <token>"
+  --header "Authorization: Bearer ${FP_TOKEN}"
 ```
 
-To show the command again, or to make a new token:
+For Codex, use `connect.codex`:
+
+```bash
+codex mcp add feedback-pilgrim --url https://feedback.example.com/mcp --bearer-token-env-var FP_TOKEN
+```
+
+To show the commands again, or to make a new token:
 
 ```bash
 docker exec feedbackpilgrim php artisan fp:mcp:connect --client=claude --json
@@ -119,6 +129,16 @@ docker exec feedbackpilgrim php artisan fp:mcp:connect --client=claude --token=n
 `--client` also accepts `codex`, `cursor` and `json`.
 
 To test the connection, call the `list_tags` tool. An empty list is a success.
+
+### The instance-admin MCP server
+
+A second MCP server operates the instance: status, doctor, users, projects, tokens, queue and test email. It runs over SSH and `docker exec`, with no token and no open port:
+
+```bash
+claude mcp add fp-admin -- ssh <host> docker exec -i feedbackpilgrim php artisan mcp:start fp-admin
+```
+
+A destructive tool returns a preview first. It changes data only after a second call with `confirm: true`. Creating the owner, promoting a user, rotating keys and deleting data stay CLI-only.
 
 ## 7. Report to the human
 
@@ -140,3 +160,4 @@ Give the human these items:
 | No HTTPS certificate | Make sure that ports 80 and 443 are open in the firewall. Caddy needs both. |
 | The setup URL is lost | Run `docker exec feedbackpilgrim php artisan fp:setup-url --json`. |
 | A user cannot log in | Run `docker exec feedbackpilgrim php artisan fp:user:password <email> --generate --json`. |
+| `instance_has_owner`, exit code `3` | Another email owns the instance. Run `fp:user:list --json` and ask the human. |
