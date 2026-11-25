@@ -10,6 +10,8 @@ This file lists the changes to the code for each release. The release notes for 
 
 ### Added
 
+- `install.sh`, an installer for a server with Docker. It asks only for the domain and ends with the setup URL.
+- `INSTALL.md`, the install steps for an AI agent.
 - The MCP tool `list_posts` accepts `board_id`, like `GET /api/public/v1/posts`.
 - A **Token name** field on the API Tokens settings page. The token list shows the name, so the user can tell the tokens apart.
 - The OpenAPI spec in `docs/api/openapi.yaml`, with the widget `init` call and the key that each operation needs. A Postman collection and environment are in `docs/api/`.
@@ -26,6 +28,8 @@ This file lists the changes to the code for each release. The release notes for 
 
 ### Changed
 
+- `/setup` without the correct token shows the commands that print the setup URL, instead of an empty token field. After setup, `/setup` sends the visitor to the login page instead of a 404.
+- The README starts with a one-command quickstart. The long self-hosting text moved to the docs repository.
 - The license in `composer.json` and `package.json` is `AGPL-3.0-only`. Before, `composer.json` had the `MIT` value of the Laravel skeleton.
 - The default image in `docker-compose.image.yml` is `ghcr.io/amedina068/feedbackpilgrim`.
 - The SMTP mailer reads `MAIL_SCHEME` (`smtp` or `smtps`). `MAIL_ENCRYPTION` had no effect in Laravel 13, so `.env.example` and `config/mail.php` no longer use it.

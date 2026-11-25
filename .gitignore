@@ -26,3 +26,7 @@ yarn-error.log
 /playwright-report
 /blob-report
 /playwright/.cache
+
+# Local agent files of contributors. `php artisan boost:install` writes .mcp.json.
+/.council
+/.mcp.json
