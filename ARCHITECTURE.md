@@ -62,9 +62,11 @@ over stdio (`Mcp::local('fp-admin')`, started with `php artisan mcp:start fp-adm
 `RedirectToSetup` (alias `setupRedirect`, on the app-domain route group) sends `GET /`,
 `GET /login` and every `/register` request there until then. The form needs a token from
 `App\Support\InstanceSetup` (HMAC-SHA256 of `feedbackpilgrim-setup` with `APP_KEY`, cut to
-32 characters). `App\Actions\Instance\CreateInstanceOwner` takes a cache lock and checks
+32 characters). Without the correct token in the query, `/setup` shows no form. It shows the
+commands that print the setup URL, and a field for the token or the full URL.
+`App\Actions\Instance\CreateInstanceOwner` takes a cache lock and checks
 again inside the transaction, so only one owner is created. After the first user exists,
-`/setup` returns 404. The admin area (`/admin/users`, `/admin/settings`,
+`GET /setup` redirects to `/login` with a message, and `POST /setup` returns 404. The admin area (`/admin/users`, `/admin/settings`,
 `App\Http\Controllers\Admin\*`) is open only to a User with `is_owner`. `EnsureUserIsOwner`
 (alias `owner`) gives everyone else a 404.
 

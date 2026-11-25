@@ -1,4 +1,47 @@
 <x-auth-layout>
+@if (! $tokenIsValid)
+    <x-slot:title>Find the setup URL</x-slot:title>
+
+    <p class="text-sm text-fp-mid">
+        This instance has no account yet. To create the owner account, open the setup URL. The URL contains a token that proves that you operate this server.
+    </p>
+
+    @if ($errors->has('token'))
+        <x-input-error :messages="$errors->get('token')" class="mt-4" />
+    @elseif ($token !== '')
+        <p class="mt-4 text-sm text-fp-danger">The token in this URL is not correct.</p>
+    @endif
+
+    <div class="mt-6 rounded-md bg-fp-surface p-4 text-sm leading-6 text-fp-mid ring-1 ring-white/5">
+        <p>On the server, run the command for your install. The output shows the setup URL.</p>
+        <dl class="mt-3 space-y-3">
+            <div>
+                <dt class="text-xs text-fp-low">Docker</dt>
+                <dd><code class="font-mono text-fp-hi">docker logs feedbackpilgrim</code></dd>
+            </div>
+            <div>
+                <dt class="text-xs text-fp-low">Docker Compose</dt>
+                <dd><code class="font-mono text-fp-hi">docker compose logs</code></dd>
+            </div>
+            <div>
+                <dt class="text-xs text-fp-low">Any install</dt>
+                <dd><code class="font-mono text-fp-hi">php artisan fp:setup-url</code></dd>
+            </div>
+        </dl>
+        <p class="mt-3 text-xs text-fp-low">If your container has another name, use that name. In a container, put <code class="font-mono">docker exec &lt;container&gt;</code> before the artisan command.</p>
+    </div>
+
+    <form method="GET" action="/setup" class="mt-8 space-y-5">
+        <div>
+            <x-input-label for="token" value="Setup token or setup URL" />
+            <x-text-input id="token" class="mt-1 block w-full font-mono" type="text" name="token" required autofocus autocomplete="off" spellcheck="false" />
+        </div>
+
+        <x-primary-button class="w-full justify-center">
+            Continue
+        </x-primary-button>
+    </form>
+@else
     <x-slot:title>Set up this instance</x-slot:title>
 
     <p class="text-sm text-fp-mid">
@@ -8,18 +51,8 @@
     <form method="POST" action="/setup" class="mt-8 space-y-5">
         @csrf
 
-        <div>
-            <x-input-label for="token" value="Setup token" />
-            <x-text-input id="token" class="mt-1 block w-full font-mono" type="text" name="token" :value="old('token', $token)" required autocomplete="off" spellcheck="false" aria-describedby="token-help" />
-            <x-input-error :messages="$errors->get('token')" class="mt-2" />
-            <div id="token-help" class="mt-2 rounded-md bg-fp-surface p-3 text-xs leading-5 text-fp-mid ring-1 ring-white/5">
-                The token proves that you operate this server. The setup URL contains it. Find the URL here:
-                <ul class="mt-1 list-inside list-disc">
-                    <li>the log of the web container: <code class="font-mono text-fp-hi">docker compose logs web</code></li>
-                    <li>the output of <code class="font-mono text-fp-hi">php artisan fp:setup-url</code></li>
-                </ul>
-            </div>
-        </div>
+        <input type="hidden" name="token" value="{{ $token }}">
+        <x-input-error :messages="$errors->get('token')" />
 
         <div>
             <x-input-label for="name" value="Your name" />
@@ -65,4 +98,5 @@
             Create the owner account
         </x-primary-button>
     </form>
+@endif
 </x-auth-layout>
