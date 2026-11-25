@@ -1,0 +1,10 @@
+#!/command/with-contenv sh
+# The scheduler. Set FP_SCHEDULER=false to run it in another container.
+# --whisper hides the "No scheduled commands are ready to run" line.
+cd /var/www/html || exit 1
+
+if [ "${FP_SCHEDULER:-true}" = "false" ]; then
+    exec sleep infinity
+fi
+
+exec php artisan schedule:work --whisper

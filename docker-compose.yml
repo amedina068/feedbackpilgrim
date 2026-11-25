@@ -1,78 +1,82 @@
-# Feedback Pilgrim: self-hosted stack.
+# Feedback Pilgrim: self-hosted stack, built from this folder.
 #
-# 1. Copy .env.example to .env. Set APP_KEY, APP_DOMAIN, APP_URL and DB_PASSWORD.
-# 2. Run: docker compose up -d --build
-# 3. Run: docker compose logs web. Open the setup URL in the log.
+# SQLite (the default). It needs no .env:
+#   docker compose up -d --build
+#   docker compose logs -f web
+# The last log line is the URL to open.
 #
-# The web service listens on HTTP port APP_PORT (8080 by default) of
-# 127.0.0.1. Put a reverse proxy with TLS on the host in front of it for
-# APP_DOMAIN and *.APP_DOMAIN. APP_BIND changes the interface.
-
-x-app: &app
-  build:
-    context: .
-  image: feedbackpilgrim:local
-  restart: unless-stopped
-  env_file: .env
-  environment: &app-environment
-    DB_CONNECTION: mysql
-    DB_HOST: mysql
-    DB_PORT: 3306
-    REDIS_HOST: redis
-    REDIS_PORT: 6379
-  volumes:
-    - storage:/var/www/html/storage/app
+# MySQL and Redis:
+# 1. Copy .env.example to .env.
+# 2. In .env, remove the "#" from the lines of the "MySQL and Redis" block.
+#    Set DB_PASSWORD. The block sets COMPOSE_PROFILES=mysql, so compose also
+#    starts the mysql and redis services.
+# 3. Run: docker compose up -d --build
+#
+# The web container runs NGINX, PHP-FPM, the queue worker and the scheduler.
+# It listens on HTTP port APP_PORT (8080 by default) of 127.0.0.1. Put a
+# reverse proxy with TLS on the host in front of it for APP_DOMAIN and
+# *.APP_DOMAIN. APP_BIND changes the interface. To let the container get its
+# own certificates instead, set CADDY_ENABLED=true and publish ports 80 and 443.
+#
+# docker-compose.image.yml is the same stack with the published image. When
+# you change one file, change the other file too.
 
 services:
   web:
-    <<: *app
+    build:
+      context: .
+    image: feedbackpilgrim:local
+    restart: unless-stopped
+    # .env is optional. With no .env, the app uses SQLite in the data volume.
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # The host names of the mysql and redis services. They have an effect
+      # only when .env sets DB_CONNECTION=mysql or the redis drivers.
+      DB_HOST: mysql
+      DB_PORT: 3306
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      # Caddy in the image gives automatic HTTPS on ports 80 and 443. This
+      # stack expects a reverse proxy on the host, so Caddy is off by default.
+      CADDY_ENABLED: ${CADDY_ENABLED:-false}
     ports:
       # The app listens on the loopback interface of the host by default. Put a
       # reverse proxy on the host in front of it. Set APP_BIND=0.0.0.0 only if
       # the app must take traffic from other hosts with no proxy.
       - "${APP_BIND:-127.0.0.1}:${APP_PORT:-8080}:8080"
-    environment:
-      <<: *app-environment
-      # Only this service runs the migrations and the caches at startup.
-      AUTORUN_ENABLED: "true"
-      AUTORUN_LARAVEL_MIGRATION_TIMEOUT: "60"
-      # Create the storage link and print the setup URL at start.
-      FP_PREPARE_ON_START: "true"
+    volumes:
+      # The SQLite database, the APP_KEY file and the Caddy certificates.
+      - data:/data
+      # The uploads. Older versions of this file used the same volume.
+      - storage:/data/storage/app
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "--fail", "--output", "/dev/null", "http://127.0.0.1:8080/up"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      # A first install on MySQL runs all the migrations before /up answers.
+      start_period: 300s
+      start_interval: 2s
+    # The web container also runs the queue worker and the scheduler. It
+    # waits for MySQL and Redis only when the "mysql" profile is active.
     depends_on:
       mysql:
         condition: service_healthy
+        required: false
       redis:
         condition: service_healthy
-
-  queue:
-    <<: *app
-    command: ["php", "artisan", "queue:work", "--tries=3"]
-    stop_signal: SIGTERM
-    healthcheck:
-      test: ["CMD", "healthcheck-queue"]
-      start_period: 10s
-    depends_on:
-      web:
-        condition: service_healthy
-
-  scheduler:
-    <<: *app
-    command: ["php", "artisan", "schedule:work"]
-    stop_signal: SIGTERM
-    healthcheck:
-      test: ["CMD", "healthcheck-schedule"]
-      start_period: 10s
-    depends_on:
-      web:
-        condition: service_healthy
+        required: false
 
   mysql:
     image: mysql:8.4
+    profiles: [mysql]
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: ${DB_DATABASE:-feedbackpilgrim}
       MYSQL_USER: ${DB_USERNAME:-feedbackpilgrim}
-      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-}
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
     volumes:
       - mysql:/var/lib/mysql
@@ -85,6 +89,7 @@ services:
 
   redis:
     image: redis:7.4-alpine
+    profiles: [mysql]
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
@@ -96,6 +101,7 @@ services:
       retries: 10
 
 volumes:
+  data:
   storage:
   mysql:
   redis:
