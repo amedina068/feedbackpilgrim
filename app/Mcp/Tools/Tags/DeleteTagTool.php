@@ -9,8 +9,12 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Description('Delete a tag by id for the authenticated client. The tag is detached from all posts, contacts and release notes, then removed. Returns not-found if it belongs to another client. This is the only delete operation the API exposes.')]
+#[IsReadOnly(false)]
+#[IsDestructive(true)]
 class DeleteTagTool extends Tool
 {
     use ResolvesClientContext;

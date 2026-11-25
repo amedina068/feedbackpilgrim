@@ -10,8 +10,12 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Description('Update an existing release note by id for the authenticated client. Only supplied fields change. Returns not-found if it belongs to another client.')]
+#[IsReadOnly(false)]
+#[IsDestructive(true)]
 class UpdateReleaseNoteTool extends Tool
 {
     use ResolvesClientContext;

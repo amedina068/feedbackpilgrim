@@ -10,8 +10,10 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Description('List customer contacts for the authenticated client, with pagination, search, tag filter, and sorting. Custom metadata fields are flattened onto each record. Use to browse or find the people who submit feedback.')]
+#[IsReadOnly]
 class ListContactsTool extends Tool
 {
     use ResolvesClientContext;

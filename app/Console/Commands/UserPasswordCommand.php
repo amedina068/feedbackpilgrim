@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Concerns\AgentExit;
+use App\Console\Concerns\InteractsWithAgents;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Console\Command;
@@ -21,13 +23,16 @@ use function Laravel\Prompts\password;
  */
 class UserPasswordCommand extends Command
 {
+    use InteractsWithAgents;
+
     /**
      * @var string
      */
     protected $signature = 'fp:user:password
         {email : The email of the user}
         {--password= : The new password. The command does not prompt}
-        {--generate : Make a random password and show it one time}';
+        {--generate : Make a random password and show it one time}
+        {--json : Print one JSON object on stdout}';
 
     /**
      * @var string
@@ -36,24 +41,22 @@ class UserPasswordCommand extends Command
 
     public function handle(): int
     {
+        $this->prepareAgentMode();
+
         $user = User::query()->where('email', $this->argument('email'))->first();
 
         if (! $user) {
-            $this->components->error("No user has the email {$this->argument('email')}.");
-
-            return self::FAILURE;
+            return $this->failWith(AgentExit::INVALID, 'user_not_found', "No user has the email {$this->argument('email')}.", 'Run php artisan fp:user:list to see the users.');
         }
 
         if ($this->option('password') !== null && $this->option('generate')) {
-            $this->components->error('Use --password or --generate, not the two together.');
-
-            return self::FAILURE;
+            return $this->failWith(AgentExit::INVALID, 'conflicting_options', 'Use --password or --generate, not the two together.');
         }
 
         $password = $this->newPassword();
 
-        if ($password === null) {
-            return self::FAILURE;
+        if (is_int($password)) {
+            return $password;
         }
 
         $validator = Validator::make(
@@ -62,11 +65,10 @@ class UserPasswordCommand extends Command
         );
 
         if ($validator->fails()) {
-            foreach ($validator->errors()->all() as $error) {
-                $this->components->error($error);
-            }
-
-            return self::FAILURE;
+            return $this->failMany(AgentExit::INVALID, array_map(
+                fn (string $message) => AgentExit::error('invalid_password', $message),
+                $validator->errors()->all(),
+            ));
         }
 
         $user->forceFill([
@@ -76,25 +78,34 @@ class UserPasswordCommand extends Command
 
         event(new PasswordReset($user));
 
-        $this->components->info("The password of {$user->email} changed.");
-
-        if ($this->option('generate')) {
-            $this->line("  New password: {$password}");
-            $this->components->warn('Keep this password now. The command does not show it again.');
-        }
-
-        $this->components->bulletList([
+        $sessions = [
             'Rotated the remember token. All "Remember me" logins ended.',
             $this->endWebSessions($user),
-        ]);
+        ];
 
-        return self::SUCCESS;
+        if (! $this->wantsJson()) {
+            $this->components->info("The password of {$user->email} changed.");
+
+            if ($this->option('generate')) {
+                $this->line("  New password: {$password}");
+                $this->components->warn('Keep this password now. The command does not show it again.');
+            }
+
+            $this->components->bulletList($sessions);
+        }
+
+        return $this->respond(AgentExit::SUCCESS, [
+            'email' => $user->email,
+            'password' => $this->option('generate') ? $password : null,
+            'sessions' => $sessions,
+        ]);
     }
 
     /**
-     * Returns null when no password is available. The error is already on the screen.
+     * Returns the exit code when no password is available. The error is
+     * already reported.
      */
-    private function newPassword(): ?string
+    private function newPassword(): string|int
     {
         if ($this->option('password') !== null) {
             return $this->option('password');
@@ -106,17 +117,13 @@ class UserPasswordCommand extends Command
         }
 
         if (! $this->input->isInteractive()) {
-            $this->components->error('Give --password or --generate when the command cannot prompt.');
-
-            return null;
+            return $this->failWith(AgentExit::INVALID, 'missing_option', 'Give --password or --generate when the command cannot prompt.');
         }
 
         $password = password('New password', required: true);
 
         if ($password !== password('Type the new password again', required: true)) {
-            $this->components->error('The two passwords are not the same.');
-
-            return null;
+            return $this->failWith(AgentExit::INVALID, 'password_mismatch', 'The two passwords are not the same.');
         }
 
         return $password;

@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 /**
@@ -32,7 +33,15 @@ readonly class ClientContext
         );
     }
 
-    public static function fromToken(mixed $token): self
+    /**
+     * With abilities, the token must have one or more of them. Sanctum gives
+     * a token with `*` every ability, so the tokens from before the abilities
+     * keep working.
+     *
+     * @throws UnauthorizedHttpException
+     * @throws AccessDeniedHttpException
+     */
+    public static function fromToken(mixed $token, string ...$anyOfAbilities): self
     {
         // Only real personal access tokens carry a client_id. A TransientToken
         // (session/cookie auth) or null must be rejected — bearer tokens only.
@@ -42,6 +51,10 @@ readonly class ClientContext
 
         if (! self::tokenUserIsMemberOfTokenClient($token)) {
             throw new UnauthorizedHttpException('sanctum', 'Invalid API token');
+        }
+
+        if ($anyOfAbilities !== [] && ! collect($anyOfAbilities)->contains(fn (string $ability) => $token->can($ability))) {
+            throw new AccessDeniedHttpException('The API token needs one of these abilities: '.implode(', ', $anyOfAbilities).'.');
         }
 
         return new self(
