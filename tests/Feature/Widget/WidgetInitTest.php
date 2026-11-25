@@ -7,7 +7,6 @@ use App\Models\Contact;
 use App\Models\ReleaseNote;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Redis;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -18,14 +17,6 @@ use Tests\TestCase;
 class WidgetInitTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Redis::shouldReceive('get')->andReturn(null);
-        Redis::shouldReceive('set')->andReturn(true);
-    }
 
     private function client(bool $requireIdentityVerification = false): Client
     {
