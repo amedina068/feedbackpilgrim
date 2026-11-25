@@ -19,11 +19,10 @@ FROM ${CADDY_IMAGE} AS caddy
 # ------------------------------------------------------------------------------
 # Base: PHP with the extensions that the app needs.
 # The image already has pdo_mysql, pdo_sqlite, redis, pcntl, opcache and zip.
-# Laravel loads a schema dump with the sqlite3 or the mysql client. The
-# image does not include database/schema/mysql-schema.sql (.dockerignore):
-# the MariaDB client verifies the TLS certificate of the server, and the
-# self-signed certificate of MySQL 8.4 fails that check. On MySQL, the image
-# runs the migrations.
+# Laravel loads a schema dump with the sqlite3 or the mysql client.
+# deploy/docker/mysql-client.cnf lets the mysql client (MariaDB) load
+# database/schema/mysql-schema.sql into the MySQL 8.4 of docker-compose.yml,
+# which has a self-signed TLS certificate. deploy/README.md tells why.
 # ------------------------------------------------------------------------------
 FROM ${PHP_IMAGE} AS base
 
@@ -32,6 +31,7 @@ RUN install-php-extensions gd exif \
     && apt-get update \
     && apt-get install -y --no-install-recommends sqlite3 mariadb-client libcap2-bin \
     && rm -rf /var/lib/apt/lists/*
+COPY deploy/docker/mysql-client.cnf /etc/mysql/conf.d/feedbackpilgrim-client.cnf
 USER www-data
 
 WORKDIR /var/www/html

@@ -622,9 +622,11 @@ and the iframe share one query via `App\Support\RoadmapData::build`.
 - Schema dumps — `database/schema/sqlite-schema.sql` and `mysql-schema.sql` (made with
   `schema:dump`, no `--prune`). `scripts/check-schema-dump.sh` and the `schema-dump` CI job make
   sure that they match the migrations. The image has `/var/www/.sqliterc` with
-  `synchronous=NORMAL`, so the `sqlite3` client loads the dump in 0.2 s. The image does not
-  include `mysql-schema.sql` (`.dockerignore`): the MariaDB 11.8 client verifies the server
-  certificate, and the self-signed certificate of MySQL 8.4 fails that check.
+  `synchronous=NORMAL`, so the `sqlite3` client loads the dump in 0.2 s. The image has
+  `/etc/mysql/conf.d/feedbackpilgrim-client.cnf` (`deploy/docker/mysql-client.cnf`) with
+  `ssl-verify-server-cert = 0` for the `mysql` and `mysqldump` clients only. Thus the MariaDB 11.8
+  client loads `mysql-schema.sql` into the compose MySQL 8.4, which has a self-signed
+  certificate. PDO does not read the file. `deploy/README.md` tells why the check is off.
 - The SQLite email columns (`users.email`, `contacts.email`) use `COLLATE NOCASE`, like the
   case-insensitive collation of MySQL (`2026_11_25_000200_make_emails_case_insensitive_on_sqlite`,
   no change on MySQL). The migration runs outside a transaction, so the table rebuild can turn

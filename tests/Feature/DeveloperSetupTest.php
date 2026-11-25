@@ -56,6 +56,25 @@ class DeveloperSetupTest extends TestCase
         }
     }
 
+    public function test_docker_image_can_load_the_mysql_schema_dump(): void
+    {
+        $dockerignore = file_get_contents(base_path('.dockerignore'));
+        $dockerfile = file_get_contents(base_path('Dockerfile'));
+        $clientConfig = file_get_contents(base_path('deploy/docker/mysql-client.cnf'));
+
+        $this->assertFileExists(base_path('database/schema/mysql-schema.sql'));
+        $this->assertDoesNotMatchRegularExpression('/^database\/schema/m', $dockerignore);
+        $this->assertStringContainsString(
+            'COPY deploy/docker/mysql-client.cnf /etc/mysql/conf.d/feedbackpilgrim-client.cnf',
+            $dockerfile
+        );
+
+        // Only the clients that load and make a dump skip the check. PDO does not read this file.
+        preg_match_all('/^\[([a-z-]+)\]$/m', $clientConfig, $groups);
+        $this->assertSame(['mysql', 'mysqldump'], $groups[1]);
+        $this->assertSame(2, substr_count($clientConfig, "\nssl-verify-server-cert = 0\n"));
+    }
+
     public function test_env_example_documents_each_variable_of_the_compose_files(): void
     {
         $envExample = file_get_contents(base_path('.env.example'));
