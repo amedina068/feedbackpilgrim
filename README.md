@@ -5,6 +5,13 @@
 
 A self-hosted feedback board. Your customers post feature requests, vote and comment on a public site for each product. You sort the requests by the revenue of the customers who ask for them.
 
+<p>
+  <img src=".github/screenshots/board.webp" width="49%" alt="The public board of a project. The posts are sorted by votes.">
+  <img src=".github/screenshots/post.webp" width="49%" alt="A post on the public board with its votes, voters and comments.">
+  <img src=".github/screenshots/roadmap.webp" width="49%" alt="The public roadmap with the planned, active and complete posts.">
+  <img src=".github/screenshots/dashboard.webp" width="49%" alt="The admin dashboard with the weekly summary and the contact activity.">
+</p>
+
 ```bash
 docker run -d --name feedbackpilgrim -p 8080:8080 -v feedbackpilgrim:/data ghcr.io/amedina068/feedbackpilgrim
 docker logs -f feedbackpilgrim
