@@ -17,7 +17,7 @@
         "guzzlehttp/guzzle": "^7.2",
         "laravel/breeze": "^2.0",
         "laravel/framework": "^13.0",
-        "laravel/mcp": "^0.9.7",
+        "laravel/mcp": "^1.2.1",
         "laravel/sanctum": "^4.4",
         "laravel/tinker": "^3.0",
         "lasserafn/php-initial-avatar-generator": "^4.3",
