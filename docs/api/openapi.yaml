@@ -304,7 +304,8 @@ paths:
       tags: [Posts]
       summary: Create a post
       description: >-
-        Creates a post for the client. Without `board_id`, the post goes on the first board of the client.
+        Creates a post for the client. Without `board_id`, the post goes on the first public board of the client.
+        If the client has no public board, the post goes on the first board.
         The status sets the stage of the post.
       operationId: createPost
       security:
@@ -1631,7 +1632,7 @@ components:
           enum: [pending, in_progress, completed]
         board_id:
           type: integer
-          description: The ID of a board of the client. The default is the first board of the client.
+          description: The ID of a board of the client. The default is the first public board of the client, or the first board if no board is public.
         tags:
           type: array
           items:
