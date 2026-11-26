@@ -1729,24 +1729,6 @@ parameters:
 			path: app/Models/Message.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Post.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Post.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$type\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Post.php
-
-		-
 			message: '#^Class App\\Models\\Post uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
 			identifier: missingType.generics
 			count: 1
@@ -1821,12 +1803,6 @@ parameters:
 		-
 			message: '#^Method App\\Models\\Post\:\:scopeWithScore\(\) has parameter \$query with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/Models/Post.php
-
-		-
-			message: '#^Method App\\Models\\Post\:\:stage\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
 			count: 1
 			path: app/Models/Post.php
 

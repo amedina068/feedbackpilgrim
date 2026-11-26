@@ -54,7 +54,7 @@ class ClientPostController extends Controller
             )
             ->orderBy($column, $direction)
             ->public()
-            ->with(['contact'])
+            ->with(['contact', 'stage'])
             ->select(['posts.*', DB::raw('COUNT(votes.id) as votes_count')])
             ->votedByContact(Auth::guard('contact')->id())
             ->groupBy('posts.id')
@@ -74,6 +74,7 @@ class ClientPostController extends Controller
             ->public()
             ->with([
                 'contact',
+                'stage',
                 'media',
                 'comments' => fn ($query) => $query->latest()->with(['contact', 'media']),
             ])

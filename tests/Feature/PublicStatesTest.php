@@ -46,6 +46,35 @@ class PublicStatesTest extends TestCase
             ->assertSee('View all posts');
     }
 
+    public function test_the_posts_list_shows_the_stage_of_a_planned_post(): void
+    {
+        $this->makePost(['stage_id' => $this->stage('planned')->id]);
+
+        $this->get($this->siteUrl('/posts'))
+            ->assertOk()
+            ->assertSee('Planned')
+            ->assertDontSee('In Progress');
+    }
+
+    public function test_the_status_badge_shows_the_name_of_each_stage(): void
+    {
+        foreach (['planned' => 'Planned', 'in-progress' => 'In Progress', 'complete' => 'Complete'] as $slug => $label) {
+            $post = $this->makePost(['stage_id' => $this->stage($slug)->id]);
+
+            $this->blade('<x-public.post-status :post="$post" />', ['post' => $post])
+                ->assertSee($label);
+        }
+    }
+
+    public function test_the_status_badge_is_empty_for_an_open_or_a_closed_stage(): void
+    {
+        foreach (['open', 'closed'] as $slug) {
+            $post = $this->makePost(['stage_id' => $this->stage($slug)->id]);
+
+            $this->assertSame('', trim((string) $this->blade('<x-public.post-status :post="$post" />', ['post' => $post])));
+        }
+    }
+
     public function test_the_home_page_has_an_empty_state(): void
     {
         $this->get($this->siteUrl('/'))
@@ -103,6 +132,11 @@ class PublicStatesTest extends TestCase
             'contact_id' => $this->contact->id,
             'published_at' => now(),
         ], $attributes));
+    }
+
+    private function stage(string $slug): Stage
+    {
+        return Stage::query()->where('client_id', $this->client->id)->where('slug', $slug)->firstOrFail();
     }
 
     private function siteUrl(string $path): string

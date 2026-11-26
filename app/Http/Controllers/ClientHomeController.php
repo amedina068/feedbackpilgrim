@@ -34,6 +34,7 @@ class ClientHomeController extends Controller
             ->groupBy('posts.id')
             ->with([
                 'contact',
+                'stage',
                 'comments' => fn ($query) => $query->latest()->with(['contact']),
             ])
             ->take(5)
