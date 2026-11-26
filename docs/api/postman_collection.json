@@ -1170,7 +1170,7 @@
           "request": {
             "name": "Create a post",
             "description": {
-              "content": "Creates a post for the client. Without `board_id`, the post goes on the first board of the client. The status sets the stage of the post.",
+              "content": "Creates a post for the client. Without `board_id`, the post goes on the first public board of the client. If the client has no public board, the post goes on the first board. The status sets the stage of the post.",
               "type": "text/plain"
             },
             "url": {
