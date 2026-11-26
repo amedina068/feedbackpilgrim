@@ -43,6 +43,17 @@ class MultiBoardTest extends TestCase
         $this->assertSame($client->boards()->first()->id, $post->board_id);
     }
 
+    public function test_new_post_goes_to_the_oldest_board_when_boards_share_the_first_position(): void
+    {
+        $client = Client::factory()->create();
+        $default = $client->boards()->sole();
+        Board::factory()->count(5)->create(['client_id' => $client->id, 'position' => $default->position]);
+
+        $post = Post::factory()->create(['client_id' => $client->id]);
+
+        $this->assertSame($default->id, $post->board_id);
+    }
+
     public function test_admin_can_create_a_board(): void
     {
         $client = Client::factory()->create();

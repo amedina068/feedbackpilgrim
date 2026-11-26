@@ -117,11 +117,14 @@ class Post extends Model implements HasMedia
             }
         });
 
+        // A post without a board goes to the first public board. If the client has no public board, it goes to the first board.
         static::creating(function (Post $post) {
             if (! $post->board_id && $post->client_id) {
                 $post->board_id = Board::query()
                     ->where('client_id', $post->client_id)
+                    ->orderByDesc('is_public')
                     ->orderBy('position')
+                    ->orderBy('id')
                     ->value('id');
             }
         });

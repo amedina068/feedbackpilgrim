@@ -302,7 +302,8 @@ User ──many-to-many (client_user)── Client ──< everything below is c
 - **Board** — per-client collection a Post belongs to (`name`, `slug`, `position`, `is_public`).
   Posts are board-scoped (`posts.board_id`); **stages are shared client-wide** (not board-scoped).
   Every client is seeded one default board (`Board::seedDefaultFor` from `Client::booted`,
-  `Feature Requests`); new posts auto-attach to the client's first board (`Post::creating`).
+  `Feature Requests`); new posts auto-attach to the client's first public board, or to the first board if no board is
+  public (`Post::creating`). A contact whose new post lands on a private board goes to `/posts`.
   Boards are managed at `/boards` (`BoardController`), the admin nav's "Boards" entry; each row
   links to that board's kanban. The admin Posts list exposes board filter tabs and a "Manage
   boards" link.
