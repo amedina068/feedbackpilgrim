@@ -42,3 +42,33 @@ The client of the image is MariaDB 11.8. By default, it checks the TLS certifica
 The check is off for the compose MySQL on the internal Docker network of the stack. The compose files do not publish the MySQL port, so only the containers of the stack can connect to it. MySQL makes the certificate itself, so no CA can sign it.
 
 The file is in the image, so the client also skips the check for a MySQL server outside the stack. If you need the check for such a server, build your own image without `/etc/mysql/conf.d/feedbackpilgrim-client.cnf` and without `database/schema/mysql-schema.sql`. Then the image runs all the migrations on the first boot.
+
+## The app does not use TLS to the compose MySQL
+
+On 2026-11-26, a test measured the PDO connection of the app to the MySQL 8.4 service of `docker-compose.yml` (issue #28). The test used the `mysql` profile and new volumes. This command in the web container shows the TLS state of the PDO session:
+
+```sh
+php artisan tinker --execute "dump(DB::select(\"SHOW SESSION STATUS WHERE Variable_name IN ('Ssl_cipher','Ssl_version')\"))"
+```
+
+`Ssl_cipher` and `Ssl_version` were empty. Thus PDO does not use TLS to the compose MySQL, but the server accepts TLS.
+
+PDO asks for TLS only when it gets a CA option. `config/database.php` sets `PDO::MYSQL_ATTR_SSL_CA` only when `MYSQL_ATTR_SSL_CA` is set. The compose files do not set it. `PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT` alone does not turn on TLS.
+
+The compose stack keeps PDO without TLS, for these reasons:
+
+- The compose files do not publish the MySQL port. The traffic stays on the internal Docker network of the stack, on one host.
+- To read this traffic, an attacker needs root on the host. Root can also read the MySQL volume and `.env`, so TLS does not protect the data from this attacker.
+- PDO cannot check the certificate of the compose MySQL. The certificate is self-signed, and its name is `MySQL_Server_8.4.11_Auto_Generated_Server_Certificate`, not `mysql`. The check fails also with the CA file of the server.
+- TLS without the certificate check does not stop an attacker who changes the traffic.
+- MySQL 8.4 uses `caching_sha2_password` by default. The password does not go over the network as plain text, also without TLS.
+
+### Use TLS to a MySQL server on another host
+
+If the app connects to a MySQL server on another host, turn on TLS:
+
+1. Put the CA certificate of the server in a file that the app can read. In Docker, mount the file into the web container.
+2. In `.env`, set `MYSQL_ATTR_SSL_CA` to the path of this file.
+3. Restart the app. If you use `php artisan config:cache`, run it again first.
+
+Then PDO uses TLS and checks the certificate of the server. If the check fails, the app cannot connect and shows `SQLSTATE[HY000] [2002] Cannot connect to MySQL using SSL`.
