@@ -122,6 +122,7 @@ class Post extends Model implements HasMedia
                 $post->board_id = Board::query()
                     ->where('client_id', $post->client_id)
                     ->orderBy('position')
+                    ->orderBy('id')
                     ->value('id');
             }
         });
