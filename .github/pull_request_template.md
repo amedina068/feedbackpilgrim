@@ -14,6 +14,7 @@
 - [ ] `npm run test:js` passes (when the widget changes).
 - [ ] `php artisan migrate:fresh --seed` passes (when a migration changes).
 - [ ] `CHANGELOG.md` has a line under `[Unreleased]` (when the behavior for users changes).
+- [ ] The PR title follows Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:` and similar).
 
 ## Compatibility
 
