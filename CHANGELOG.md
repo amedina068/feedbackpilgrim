@@ -8,6 +8,10 @@ This file lists the changes to the code for each release. The release notes for 
 
 ## [Unreleased]
 
+### Added
+
+- Extension points for a hosted edition or a plugin: `App\Contracts\Entitlements` can limit dashboard access and new projects, and `DashboardNavigation` and `DashboardBanners` add dashboard links, with an optional icon, and notices. With no extension, nothing changes.
+
 ### Fixed
 
 - A new post without a board goes to the first public board. Before, a contact post from the public site or the widget went to a private board when that board came first. If no board is public, the post goes to the first board, and the contact goes back to the post list.

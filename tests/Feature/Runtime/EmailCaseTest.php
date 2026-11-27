@@ -45,10 +45,10 @@ class EmailCaseTest extends TestCase
 
     public function test_the_indexes_of_the_two_tables_stay(): void
     {
-        $this->assertSame(
-            ['users_email_unique', 'users_onboarding_index'],
-            $this->indexNames('users'),
-        );
+        // An installed package can add its own indexes, for example Laravel
+        // Cashier adds users_stripe_id_index. The core indexes must stay.
+        $this->assertContains('users_email_unique', $this->indexNames('users'));
+        $this->assertContains('users_onboarding_index', $this->indexNames('users'));
         $this->assertContains('contacts_uuid_unique', $this->indexNames('contacts'));
         $this->assertContains('contacts_client_created', $this->indexNames('contacts'));
     }

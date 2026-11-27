@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Contracts\Entitlements;
+use App\Support\DashboardBanners;
+use App\Support\DashboardNavigation;
+use App\Support\UnlimitedEntitlements;
 use Aws\SesV2\SesV2Client;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -17,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->registerExtensionPoints();
+
         $this->app->bind(SesV2Client::class, function (): SesV2Client {
             $config = config('services.ses');
 
@@ -29,6 +35,20 @@ class AppServiceProvider extends ServiceProvider
                     : null,
             ]));
         });
+    }
+
+    /**
+     * Bind the extension points that a hosted edition or a plugin can use.
+     *
+     * Laravel registers the providers of discovered packages before this
+     * provider. The "If" methods keep a binding that a package made first.
+     * A provider that registers later replaces these bindings.
+     */
+    private function registerExtensionPoints(): void
+    {
+        $this->app->singletonIf(Entitlements::class, UnlimitedEntitlements::class);
+        $this->app->singletonIf(DashboardNavigation::class);
+        $this->app->singletonIf(DashboardBanners::class);
     }
 
     /**
