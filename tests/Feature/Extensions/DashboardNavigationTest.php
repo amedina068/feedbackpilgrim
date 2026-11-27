@@ -60,10 +60,23 @@ class DashboardNavigationTest extends TestCase
             ->add('Usage', '/usage', fn (User $viewer): bool => $viewer->is($user));
 
         $this->assertSame(
-            [['label' => 'Billing', 'url' => '/billing'], ['label' => 'Usage', 'url' => '/usage']],
+            [
+                ['label' => 'Billing', 'url' => '/billing', 'icon' => null],
+                ['label' => 'Usage', 'url' => '/usage', 'icon' => null],
+            ],
             $this->navigation()->items($user),
         );
-        $this->assertSame([['label' => 'Billing', 'url' => '/billing']], $this->navigation()->items($other));
+        $this->assertSame([['label' => 'Billing', 'url' => '/billing', 'icon' => null]], $this->navigation()->items($other));
+    }
+
+    public function test_items_returns_the_icon_of_an_item(): void
+    {
+        $this->navigation()->add('Billing', '/billing', icon: 'home-icon');
+
+        $this->assertSame(
+            [['label' => 'Billing', 'url' => '/billing', 'icon' => 'home-icon']],
+            $this->navigation()->items(User::factory()->create()),
+        );
     }
 
     public function test_the_dashboard_shows_no_extra_link_when_no_item_is_added(): void
@@ -82,6 +95,24 @@ class DashboardNavigationTest extends TestCase
         $this->assertSame(2, substr_count($html, 'href="/billing"'));
         $this->assertSame(2, substr_count($html, 'Billing &lt;now&gt;'));
         $this->assertStringNotContainsString('Billing <now>', $html);
+    }
+
+    public function test_the_dashboard_shows_the_icon_of_an_added_item(): void
+    {
+        $this->navigation()->add('Billing', '/billing', icon: 'home-icon');
+
+        $html = $this->actingAs($this->actingAdmin())->get('/dashboard')->assertOk()->getContent();
+
+        $this->assertSame(2, preg_match_all('#href="/billing"[^>]*>\s*<svg[^>]*class="size-6 shrink-0"#', $html));
+    }
+
+    public function test_the_dashboard_shows_no_icon_for_an_item_without_one(): void
+    {
+        $this->navigation()->add('Billing', '/billing');
+
+        $html = $this->actingAs($this->actingAdmin())->get('/dashboard')->assertOk()->getContent();
+
+        $this->assertSame(0, preg_match_all('#href="/billing"[^>]*>\s*<svg#', $html));
     }
 
     public function test_the_dashboard_hides_an_item_that_is_not_visible_to_the_user(): void

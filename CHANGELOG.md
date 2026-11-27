@@ -10,7 +10,7 @@ This file lists the changes to the code for each release. The release notes for 
 
 ### Added
 
-- Extension points for a hosted edition or a plugin: `App\Contracts\Entitlements` can limit dashboard access and new projects, and `DashboardNavigation` and `DashboardBanners` add dashboard links and notices. With no extension, nothing changes.
+- Extension points for a hosted edition or a plugin: `App\Contracts\Entitlements` can limit dashboard access and new projects, and `DashboardNavigation` and `DashboardBanners` add dashboard links, with an optional icon, and notices. With no extension, nothing changes.
 
 ### Fixed
 

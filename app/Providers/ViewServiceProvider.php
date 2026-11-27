@@ -109,7 +109,7 @@ class ViewServiceProvider extends ServiceProvider
      * link to a path of this app is active when the request is on that path
      * or below it.
      *
-     * @return list<array{label: string, url: string, active: bool}>
+     * @return list<array{label: string, url: string, icon: string|null, active: bool}>
      */
     private function extensionNavigationItems(): array
     {
@@ -121,6 +121,7 @@ class ViewServiceProvider extends ServiceProvider
             return [
                 'label' => $item['label'],
                 'url' => $item['url'],
+                'icon' => $item['icon'],
                 'active' => $path !== '' && request()->is($path, "{$path}/*"),
             ];
         }, app(DashboardNavigation::class)->items(Auth::user()));

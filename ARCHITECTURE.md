@@ -550,10 +550,12 @@ the data of a Client, but they do not create one.
 
 Add these items in the `boot()` method of a service provider. Both registries are singletons.
 
-- `App\Support\DashboardNavigation::add(string $label, string $url, ?callable $visible = null)`
+- `App\Support\DashboardNavigation::add(string $label, string $url, ?callable $visible = null, ?string $icon = null)`
   adds a link after the core links in `layouts/navigation-links`. The sidebar and the mobile
   menu both show it. `$visible` gets the `User` and returns a bool. A link to a path of this
-  app gets `aria-current="page"` on that path and below it.
+  app gets `aria-current="page"` on that path and below it. `$icon` is the name of a Blade
+  component, for example `cloud::billing-icon`. The link shows it before the label at the
+  size of the core icons. Without `$icon`, the link has no icon.
 - `App\Support\DashboardBanners::add(callable $resolver)` adds a one-line notice at the top of
   `layouts/app`. The resolver gets the `User` and returns null or
   `['message' => string, 'url' => ?string, 'link' => ?string]`. The URL must start with `/`,
