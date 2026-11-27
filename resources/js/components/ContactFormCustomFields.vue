@@ -1,13 +1,13 @@
 <template>
     <div>
         <div
-            v-for="(customField, index) in customFields"
-            :key="`custom_field_${index}`"
+            v-for="customField in customFields"
+            :key="customField.id"
         >
             <contact-form-dynamic-row
                 :fieldKey="customField.key"
                 :field="customField.field"
-                @destroyed="removeField(index)"
+                @destroyed="removeField(customField.id)"
             ></contact-form-dynamic-row>
         </div>
         <div class="px-4 py-6 sm:px-6 flex justify-center w-full">
@@ -28,15 +28,18 @@ import ContactFormDynamicRow from "./ContactFormDynamicRow.vue";
 
 const customFields = ref([]);
 
+let nextFieldId = 1;
+
 const addField = () => {
+    const id = nextFieldId++;
+
     customFields.value.push({
-        key: "custom_field_" + (customFields.value.length + 1),
+        id,
+        key: "custom_field_" + id,
         field: "",
     });
 };
 
-const removeField = (index) =>
-    (customFields.value = customFields.value.filter(
-        (item, itemIndex) => itemIndex != index
-    ));
+const removeField = (id) =>
+    (customFields.value = customFields.value.filter((item) => item.id !== id));
 </script>

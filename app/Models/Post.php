@@ -49,6 +49,9 @@ class Post extends Model implements HasMedia
         return $this->belongsTo(Client::class);
     }
 
+    /**
+     * @return BelongsTo<Stage, $this>
+     */
     public function stage(): BelongsTo
     {
         return $this->belongsTo(Stage::class);
@@ -99,6 +102,38 @@ class Post extends Model implements HasMedia
         return $this->status == self::STATUS_COMPLETED;
     }
 
+    /**
+     * The label of the status badge on the public pages.
+     *
+     * A post in a planned, an active or a complete stage shows the name of
+     * that stage. A post in an open or a closed stage shows no badge. A post
+     * with no stage uses its legacy status. The legacy status is
+     * "in_progress" for a planned stage and for an active stage, so it cannot
+     * tell the two stages apart.
+     */
+    public function publicStatusLabel(): ?string
+    {
+        if ($this->stage) {
+            return in_array($this->stage->type, [Stage::TYPE_PLANNED, Stage::TYPE_ACTIVE, Stage::TYPE_COMPLETE], true)
+                ? $this->stage->name
+                : null;
+        }
+
+        return match ($this->status) {
+            self::STATUS_IN_PROGRESS => 'In Progress',
+            self::STATUS_COMPLETED => 'Shipped',
+            default => null,
+        };
+    }
+
+    /**
+     * Tells if the public status badge uses the color of a finished post.
+     */
+    public function publicStatusIsComplete(): bool
+    {
+        return $this->stage ? $this->stage->isComplete() : $this->completed();
+    }
+
     protected static function booted(): void
     {
         static::saving(function (Post $post) {
@@ -117,11 +152,14 @@ class Post extends Model implements HasMedia
             }
         });
 
+        // A post without a board goes to the first public board. If the client has no public board, it goes to the first board.
         static::creating(function (Post $post) {
             if (! $post->board_id && $post->client_id) {
                 $post->board_id = Board::query()
                     ->where('client_id', $post->client_id)
+                    ->orderByDesc('is_public')
                     ->orderBy('position')
+                    ->orderBy('id')
                     ->value('id');
             }
         });

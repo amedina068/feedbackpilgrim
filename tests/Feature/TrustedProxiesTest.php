@@ -56,6 +56,15 @@ class TrustedProxiesTest extends TestCase
         $this->requestFrom('173.245.48.5')->assertJson(['ip' => '173.245.48.5']);
     }
 
+    public function test_the_loopback_addresses_are_always_trusted(): void
+    {
+        $this->assertContains('127.0.0.1', $this->loadProxiesWith(''));
+        $this->assertContains('::1', $this->loadProxiesWith(''));
+        $this->assertContains('127.0.0.1', $this->loadProxiesWith('10.0.0.0/8'));
+
+        $this->requestFrom('127.0.0.1')->assertJson(['ip' => '198.51.100.7', 'secure' => true]);
+    }
+
     public function test_an_empty_trusted_proxies_setting_uses_the_cloudflare_ranges(): void
     {
         $proxies = $this->loadProxiesWith('');

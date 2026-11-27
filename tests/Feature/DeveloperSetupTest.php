@@ -41,18 +41,38 @@ class DeveloperSetupTest extends TestCase
         );
     }
 
-    public function test_deploy_examples_run_the_workers_of_the_compose_file(): void
+    public function test_deploy_examples_run_the_workers_of_the_docker_image(): void
     {
-        $compose = file_get_contents(base_path('docker-compose.yml'));
+        $image = file_get_contents(base_path('deploy/docker/s6-rc.d/queue/run'))
+            .file_get_contents(base_path('deploy/docker/s6-rc.d/scheduler/run'));
         $systemd = file_get_contents(base_path('deploy/systemd/feedbackpilgrim-queue.service'))
             .file_get_contents(base_path('deploy/systemd/feedbackpilgrim-scheduler.service'));
         $supervisor = file_get_contents(base_path('deploy/supervisor/feedbackpilgrim.conf'));
 
         foreach (['queue:work --tries=3', 'schedule:work'] as $command) {
-            $this->assertStringContainsString('"'.str_replace(' ', '", "', $command).'"]', $compose);
+            $this->assertStringContainsString("artisan {$command}", $image);
             $this->assertStringContainsString("artisan {$command}\n", $systemd);
             $this->assertStringContainsString("artisan {$command}\n", $supervisor);
         }
+    }
+
+    public function test_docker_image_can_load_the_mysql_schema_dump(): void
+    {
+        $dockerignore = file_get_contents(base_path('.dockerignore'));
+        $dockerfile = file_get_contents(base_path('Dockerfile'));
+        $clientConfig = file_get_contents(base_path('deploy/docker/mysql-client.cnf'));
+
+        $this->assertFileExists(base_path('database/schema/mysql-schema.sql'));
+        $this->assertDoesNotMatchRegularExpression('/^database\/schema/m', $dockerignore);
+        $this->assertStringContainsString(
+            'COPY deploy/docker/mysql-client.cnf /etc/mysql/conf.d/feedbackpilgrim-client.cnf',
+            $dockerfile
+        );
+
+        // Only the clients that load and make a dump skip the check. PDO does not read this file.
+        preg_match_all('/^\[([a-z-]+)\]$/m', $clientConfig, $groups);
+        $this->assertSame(['mysql', 'mysqldump'], $groups[1]);
+        $this->assertSame(2, substr_count($clientConfig, "\nssl-verify-server-cert = 0\n"));
     }
 
     public function test_env_example_documents_each_variable_of_the_compose_files(): void

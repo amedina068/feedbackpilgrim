@@ -10,8 +10,12 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsDestructive;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Description('Rename a tag by id for the authenticated client. The new title must be unique within your client. Returns not-found if it belongs to another client.')]
+#[IsReadOnly(false)]
+#[IsDestructive(true)]
 class UpdateTagTool extends Tool
 {
     use ResolvesClientContext;

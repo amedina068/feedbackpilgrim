@@ -23,6 +23,24 @@
                 <x-primary-button type="submit">{{ __('Generate token') }}</x-primary-button>
             </div>
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
+
+            <label for="token-access" class="mt-3 block text-sm font-medium text-fp-mid">{{ __('Access') }}</label>
+            <x-base.select name="access" id="token-access">
+                <option value="full">{{ __('REST API and MCP, read and write') }}</option>
+                <option value="mcp">{{ __('MCP, read and write') }}</option>
+                <option value="mcp_read">{{ __('MCP, read only') }}</option>
+                <option value="api">{{ __('REST API only') }}</option>
+            </x-base.select>
+            <x-input-error class="mt-2" :messages="$errors->get('access')" />
+
+            <label for="token-expiry" class="mt-3 block text-sm font-medium text-fp-mid">{{ __('Expires') }}</label>
+            <x-base.select name="expires_in_days" id="token-expiry">
+                <option value="">{{ __('Never') }}</option>
+                @foreach (\App\Http\Controllers\ApiKeyController::EXPIRY_DAYS as $days)
+                    <option value="{{ $days }}">{{ trans_choice(':count day|:count days', $days) }}</option>
+                @endforeach
+            </x-base.select>
+            <x-input-error class="mt-2" :messages="$errors->get('expires_in_days')" />
         </form>
     </div>
 
@@ -69,6 +87,19 @@
                                     {{ __('last used') }} {{ $token->last_used_at->diffForHumans() }}
                                 @else
                                     {{ __('never used') }}
+                                @endif
+                            </p>
+                            <p class="mt-0.5 text-xs text-fp-low">
+                                @if (in_array('*', (array) $token->abilities, true))
+                                    {{ __('Full access (old token)') }}
+                                @else
+                                    {{ collect((array) $token->abilities)->map(fn ($ability) => ['mcp:read' => 'MCP read', 'mcp:write' => 'MCP write', 'api' => 'REST API'][$ability] ?? $ability)->join(', ') }}
+                                @endif
+                                <span aria-hidden="true">&middot;</span>
+                                @if ($token->expires_at)
+                                    {{ $token->expires_at->isPast() ? __('expired') : __('expires') }} {{ $token->expires_at->format('M j, Y') }}
+                                @else
+                                    {{ __('no expiry') }}
                                 @endif
                             </p>
                         </div>

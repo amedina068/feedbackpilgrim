@@ -2,7 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Models\User;
+use App\Console\Concerns\AgentExit;
+use App\Console\Concerns\InteractsWithAgents;
+use App\Mcp\Tools\Admin\ListUsersTool;
 use Illuminate\Console\Command;
 
 /**
@@ -10,11 +12,14 @@ use Illuminate\Console\Command;
  */
 class UserListCommand extends Command
 {
+    use InteractsWithAgents;
+
     /**
      * @var string
      */
     protected $signature = 'fp:user:list
-        {--search= : Show only the users whose name or email contains this text}';
+        {--search= : Show only the users whose name or email contains this text}
+        {--json : Print one JSON object on stdout}';
 
     /**
      * @var string
@@ -23,39 +28,29 @@ class UserListCommand extends Command
 
     public function handle(): int
     {
-        $search = trim((string) $this->option('search'));
+        $this->prepareAgentMode();
 
-        $users = User::query()
-            ->with(['clients' => fn ($query) => $query->select('clients.id', 'clients.name')->orderBy('clients.name')])
-            ->when($search !== '', function ($query) use ($search) {
-                $like = '%'.addcslashes($search, '\\%_').'%';
+        $users = ListUsersTool::users((string) $this->option('search'));
 
-                $query->where(fn ($query) => $query
-                    ->where('name', 'like', $like)
-                    ->orWhere('email', 'like', $like));
-            })
-            ->orderBy('id')
-            ->get();
-
-        if ($users->isEmpty()) {
-            $this->components->info('No user matches.');
-
-            return self::SUCCESS;
+        if (! $this->wantsJson()) {
+            if ($users === []) {
+                $this->components->info('No user matches.');
+            } else {
+                $this->table(
+                    ['ID', 'Name', 'Email', 'Projects', 'Owner', 'Status', 'Created'],
+                    array_map(fn (array $user) => [
+                        $user['id'],
+                        $user['name'],
+                        $user['email'],
+                        implode(', ', $user['projects']),
+                        $user['owner'] ? 'yes' : 'no',
+                        $user['status'],
+                        substr((string) $user['created_at'], 0, 10),
+                    ], $users),
+                );
+            }
         }
 
-        $this->table(
-            ['ID', 'Name', 'Email', 'Projects', 'Owner', 'Status', 'Created'],
-            $users->map(fn (User $user) => [
-                $user->id,
-                $user->name,
-                $user->email,
-                $user->clients->pluck('name')->join(', '),
-                $user->isOwner() ? 'yes' : 'no',
-                $user->isDeactivated() ? 'deactivated' : 'active',
-                $user->created_at?->toDateString(),
-            ]),
-        );
-
-        return self::SUCCESS;
+        return $this->respond(AgentExit::SUCCESS, ['users' => $users]);
     }
 }

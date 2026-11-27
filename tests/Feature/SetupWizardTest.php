@@ -41,11 +41,52 @@ class SetupWizardTest extends TestCase
 
     public function test_the_setup_page_shows_the_form_with_the_token_from_the_url(): void
     {
-        $this->get('/setup?token=abc123')
+        $this->get('/setup?token='.$this->token())
             ->assertOk()
-            ->assertSee('value="abc123"', false)
-            ->assertSee('fp:setup-url')
+            ->assertSee('value="'.$this->token().'"', false)
+            ->assertSee('name="password"', false)
             ->assertSee('.'.config('app.domain'));
+    }
+
+    public function test_the_setup_page_without_a_token_tells_how_to_find_the_setup_url(): void
+    {
+        $this->get('/setup')
+            ->assertOk()
+            ->assertSee('Find the setup URL')
+            ->assertSee('docker logs feedbackpilgrim')
+            ->assertSee('php artisan fp:setup-url')
+            ->assertDontSee('name="password"', false)
+            ->assertDontSee('is not correct');
+    }
+
+    public function test_the_setup_page_with_a_wrong_token_tells_how_to_find_the_setup_url(): void
+    {
+        $this->get('/setup?token=wrong-token')
+            ->assertOk()
+            ->assertSee('The token in this URL is not correct.')
+            ->assertSee('docker logs feedbackpilgrim')
+            ->assertDontSee('name="password"', false)
+            ->assertDontSee('value="wrong-token"', false);
+    }
+
+    public function test_the_setup_page_accepts_a_pasted_setup_url(): void
+    {
+        $pasted = urlencode('http://localhost:8080/setup?token='.$this->token());
+
+        $this->get('/setup?token='.$pasted)
+            ->assertOk()
+            ->assertSee('value="'.$this->token().'"', false)
+            ->assertSee('name="password"', false);
+    }
+
+    public function test_a_failed_post_shows_the_error_on_the_setup_url_page(): void
+    {
+        $this->from('/setup?token=wrong-token')
+            ->post('/setup', $this->form(['token' => 'wrong-token']))
+            ->assertRedirect('/setup?token=wrong-token');
+
+        $this->get('/setup?token=wrong-token')
+            ->assertSee('The setup token is not correct.');
     }
 
     public function test_a_wrong_token_creates_no_account(): void
@@ -126,11 +167,13 @@ class SetupWizardTest extends TestCase
         $this->assertDatabaseCount('clients', 0);
     }
 
-    public function test_setup_is_not_found_after_a_user_exists(): void
+    public function test_setup_sends_to_the_login_page_after_a_user_exists(): void
     {
         User::factory()->create();
 
-        $this->get('/setup?token='.$this->token())->assertNotFound();
+        $this->get('/setup?token='.$this->token())
+            ->assertRedirect('/login')
+            ->assertSessionHas('status', 'This instance is already set up. Log in with your account.');
         $this->post('/setup', $this->form())->assertNotFound();
 
         $this->assertDatabaseMissing('users', ['email' => 'owner@example.com']);

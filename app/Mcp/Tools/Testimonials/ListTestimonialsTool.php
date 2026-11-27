@@ -10,8 +10,10 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
 #[Description('List testimonials for the authenticated client, with pagination, search, rating filter, and sorting. Note: when the approved filter is omitted, only pending testimonials are returned; pass approved=true for approved ones. Use to browse social proof.')]
+#[IsReadOnly]
 class ListTestimonialsTool extends Tool
 {
     use ResolvesClientContext;

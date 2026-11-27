@@ -11,6 +11,20 @@ This file lists the changes to the code for each release. The release notes for 
 ### Added
 
 - Extension points for a hosted edition or a plugin: `App\Contracts\Entitlements` can limit dashboard access and new projects, and `DashboardNavigation` and `DashboardBanners` add dashboard links and notices. With no extension, nothing changes.
+
+### Fixed
+
+- A new post without a board goes to the first public board. Before, a contact post from the public site or the widget went to a private board when that board came first. If no board is public, the post goes to the first board, and the contact goes back to the post list.
+- The status badge on the public posts list, the home page and the post page shows the name of the stage of the post. Before, a post in the "Planned" stage showed "In Progress", and a post in the "Complete" stage showed "Shipped". A post in an open or a closed stage shows no badge, as before.
+
+## [0.1.0] - 2026-11-25
+
+The first public release.
+
+### Added
+
+- `install.sh`, an installer for a server with Docker. It asks only for the domain and ends with the setup URL.
+- `INSTALL.md`, the install steps for an AI agent.
 - The MCP tool `list_posts` accepts `board_id`, like `GET /api/public/v1/posts`.
 - A **Token name** field on the API Tokens settings page. The token list shows the name, so the user can tell the tokens apart.
 - The OpenAPI spec in `docs/api/openapi.yaml`, with the widget `init` call and the key that each operation needs. A Postman collection and environment are in `docs/api/`.
@@ -24,9 +38,26 @@ This file lists the changes to the code for each release. The release notes for 
 - An **Import** button on the Testimonials page. It imports a CSV export from Senja. Each row with text becomes an approved testimonial. A second import of the same file skips the rows that are already imported, and the result shows their count. A queued job copies each avatar to the app storage, so the public site does not load images from Senja.
 - Example files in `deploy/` for an install without Docker: NGINX, Caddy, systemd and Supervisor. An NGINX example for a proxy in front of the Docker stack.
 - A **Settings > Email** page to send email from the domain of a project through Amazon SES. The page shows the DNS records, and the app checks a pending domain every 10 minutes. Until SES verifies the domain, emails go out from `MAIL_FROM_ADDRESS`. The new `AWS_SES_*` values are optional.
+- Feedback boards with posts, votes, comments, tags and stages. A project can have more than one board.
+- A public site for each project on its own subdomain, with the posts, the roadmap, the release notes and the testimonials.
+- Revenue weighting: the MRR and the LTV of each contact, and a sort of the requests by revenue.
+- Release notes, and a notification to the voters when a request ships.
+- Testimonials with a rating, and an approval step before a testimonial shows.
+- An embeddable widget (`pilgrim.js`) that signs in the users of your app with a publishable key and an HMAC `userHash`.
+- A versioned REST API with an OpenAPI document and a Postman collection.
+- An MCP server for AI agents, with tools for posts, comments, release notes, contacts, testimonials and tags.
+- Signed webhooks and Slack messages.
+- A weekly report (`fp:weekly`) that the scheduler starts each Monday.
+- Self-hosting with Docker Compose: web, queue worker, scheduler, MySQL and Redis.
+- A Docker image on GHCR for each release, for `linux/amd64` and `linux/arm64`, and `docker-compose.image.yml` to run it without a build.
+- A first-run setup page and the `fp:install` command to create the owner of the instance.
+- Open and closed registration modes, an owner role, user deactivation and account recovery commands (`fp:user:list`, `fp:user:password`).
+- Optional Mailgun, Amazon SES, Rollbar and Plausible.
 
 ### Changed
 
+- `/setup` without the correct token shows the commands that print the setup URL, instead of an empty token field. After setup, `/setup` sends the visitor to the login page instead of a 404.
+- The README starts with a one-command quickstart. The long self-hosting text moved to the docs repository.
 - The license in `composer.json` and `package.json` is `AGPL-3.0-only`. Before, `composer.json` had the `MIT` value of the Laravel skeleton.
 - The default image in `docker-compose.image.yml` is `ghcr.io/amedina068/feedbackpilgrim`.
 - The SMTP mailer reads `MAIL_SCHEME` (`smtp` or `smtps`). `MAIL_ENCRYPTION` had no effect in Laravel 13, so `.env.example` and `config/mail.php` no longer use it.
@@ -40,16 +71,16 @@ This file lists the changes to the code for each release. The release notes for 
 - Each error of the REST API and the widget `init` call has a `message` field. The `error` field stays for older clients.
 - A missing record gives a message that names the record and the ID, for example `No post with ID 42 exists for the client of this token.` This applies to the REST API and the MCP tools.
 
+### Deprecated
+
+- The `X-FeedbackPilgrim-Signature` webhook header signs the body only. The next release removes it. Verify `X-FeedbackPilgrim-Signature-V2` instead.
+
 ### Removed
 
 - The `alpinejs` package. The app did not start Alpine, so its directives did nothing. Vue components replace them.
 - The `mitt` package. No code imported it.
 - The message pages: `MessageController`, `MessageNoteController`, `MessageStatusController`, their views, and the `latest-messages` and `message-panel` components. No route or view used them. The `Message` model and its table stay.
 - The lookup of the `custom_domain` client setting. Nothing in the app set it, and custom domains are not supported. A host outside `APP_DOMAIN` gets 404.
-
-### Deprecated
-
-- The `X-FeedbackPilgrim-Signature` webhook header signs the body only. The next release removes it. Verify `X-FeedbackPilgrim-Signature-V2` instead.
 
 ### Fixed
 
@@ -82,6 +113,7 @@ This file lists the changes to the code for each release. The release notes for 
 - `GET /posts?sort_by=<unknown value>` on the public site returned 500, and the value went into the SQL `ORDER BY`. The page now accepts only its four sorts. Another value shows the newest posts.
 - The project form refused an empty website, because the `domain` rule referred to itself. An empty website now removes the "Back to" link of the public site.
 - After an `APP_KEY` change, the widget settings page, the **Regenerate secret** button and each widget `init` call with a `userHash` returned 500. The page now says that the app cannot read the secret, the button makes a new secret, and the widget refuses the hash with 403.
+- On the contact edit page, a click on **Remove field** for one custom field also hid the next field, and a save lost its value. Each row now has a stable ID, so only the selected row goes away. A new row also gets a field name that no other row uses.
 
 ### Security
 
@@ -99,28 +131,6 @@ This file lists the changes to the code for each release. The release notes for 
 - An admin who is a member of more than one project now always acts as the admin contact of the current project. Before, the public site, a dashboard comment and a dashboard post without a contact were able to use the admin contact of another project.
 - The post notes and contact notes pages change the post or the contact of the URL. Before, the post notes page changed the first post of the project, and the contact notes page returned 404.
 - The posts and contacts pages of the dashboard accept only their listed sorts. An unknown `sort_by` value shows the default order. Before, it returned 500.
-
-## [0.1.0] - Unreleased
-
-The first public release.
-
-### Added
-
-- Feedback boards with posts, votes, comments, tags and stages. A project can have more than one board.
-- A public site for each project on its own subdomain, with the posts, the roadmap, the release notes and the testimonials.
-- Revenue weighting: the MRR and the LTV of each contact, and a sort of the requests by revenue.
-- Release notes, and a notification to the voters when a request ships.
-- Testimonials with a rating, and an approval step before a testimonial shows.
-- An embeddable widget (`pilgrim.js`) that signs in the users of your app with a publishable key and an HMAC `userHash`.
-- A versioned REST API with an OpenAPI document and a Postman collection.
-- An MCP server for AI agents, with tools for posts, comments, release notes, contacts, testimonials and tags.
-- Signed webhooks and Slack messages.
-- A weekly report (`fp:weekly`) that the scheduler starts each Monday.
-- Self-hosting with Docker Compose: web, queue worker, scheduler, MySQL and Redis.
-- A Docker image on GHCR for each release, for `linux/amd64` and `linux/arm64`, and `docker-compose.image.yml` to run it without a build.
-- A first-run setup page and the `fp:install` command to create the owner of the instance.
-- Open and closed registration modes, an owner role, user deactivation and account recovery commands (`fp:user:list`, `fp:user:password`).
-- Optional Mailgun, Amazon SES, Rollbar and Plausible.
 
 [Unreleased]: https://github.com/amedina068/feedbackpilgrim/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/amedina068/feedbackpilgrim/releases/tag/v0.1.0

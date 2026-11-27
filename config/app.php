@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\InstanceUrl;
 use Illuminate\Support\Facades\Facade;
 
 return [
@@ -15,7 +16,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME') ?: 'Feedback Pilgrim',
 
     /*
     |--------------------------------------------------------------------------
@@ -54,7 +55,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => $appUrl = InstanceUrl::url(env('APP_URL'), env('APP_DOMAIN')),
 
     /*
     | The host of APP_URL serves the admin app, the auth pages and the docs.
@@ -63,9 +64,9 @@ return [
     | feedbackpilgrim.com). The app host is never a client board.
     */
 
-    'host' => parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST) ?: 'localhost',
+    'host' => InstanceUrl::host($appUrl),
 
-    'domain' => env('APP_DOMAIN', 'feedbackpilgrim.test'),
+    'domain' => InstanceUrl::domain(env('APP_DOMAIN'), $appUrl),
 
     /*
     |--------------------------------------------------------------------------
@@ -144,7 +145,8 @@ return [
     |
     */
 
-    'key' => env('APP_KEY'),
+    // The Docker image writes the key to this file on the first boot.
+    'key' => InstanceUrl::key(env('APP_KEY'), env('APP_KEY_FILE') ?: '/data/.secrets/app_key'),
 
     'cipher' => 'AES-256-CBC',
 

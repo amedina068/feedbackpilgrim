@@ -6,7 +6,6 @@ use App\Http\Controllers\Api\InitController;
 use App\Models\Client;
 use App\Models\Contact;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Redis;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -17,14 +16,6 @@ use Tests\TestCase;
 class WidgetInitInputTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Redis::shouldReceive('get')->andReturn(null);
-        Redis::shouldReceive('set')->andReturn(true);
-    }
 
     private function client(): Client
     {

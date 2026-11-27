@@ -1,3 +1,10 @@
 # Each issue uses a template. GitHub adds a "Report a security vulnerability"
 # link to the template list when private vulnerability reporting is on.
 blank_issues_enabled: false
+contact_links:
+  - name: Question
+    url: https://github.com/amedina068/feedbackpilgrim/discussions/categories/q-a
+    about: Ask a question about the install, the configuration or the use of Feedback Pilgrim.
+  - name: Documentation
+    url: https://feedbackpilgrim.com/docs
+    about: The guides for the install, the configuration, the API and the SDKs.

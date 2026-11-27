@@ -54,7 +54,7 @@ class ClientPostController extends Controller
             )
             ->orderBy($column, $direction)
             ->public()
-            ->with(['contact'])
+            ->with(['contact', 'stage'])
             ->select(['posts.*', DB::raw('COUNT(votes.id) as votes_count')])
             ->votedByContact(Auth::guard('contact')->id())
             ->groupBy('posts.id')
@@ -74,6 +74,7 @@ class ClientPostController extends Controller
             ->public()
             ->with([
                 'contact',
+                'stage',
                 'media',
                 'comments' => fn ($query) => $query->latest()->with(['contact', 'media']),
             ])
@@ -151,7 +152,10 @@ class ClientPostController extends Controller
 
         $this->notifyUser($post);
 
-        return redirect("/posts/{$post->id}")->with('success', 'Post created successfully');
+        // A post on a private board is for the team only. Its public page returns 404.
+        $target = $post->board()->value('is_public') ? "/posts/{$post->id}" : '/posts';
+
+        return redirect($target)->with('success', 'Post created successfully');
     }
 
     private function notifyUser($post)

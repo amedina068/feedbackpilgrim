@@ -92,7 +92,10 @@ The seeders create the owner `test@example.com` with the password `password`, an
 | `npm run build` | Build the dashboard assets (`public/build`) and the widget (`public/pilgrim.js`) |
 | `php artisan migrate` | Run the migrations |
 | `php artisan db:seed` | Add example data |
+| `shellcheck install.sh` | Check the installer script. Then run `bash install.sh --dry-run` to see each docker command. |
 | `composer api-docs` | Make `public/docs/openapi.json` and the Postman files again from `docs/api/openapi.yaml` |
+
+Laravel Boost is a development dependency. To use its MCP tools in your editor, run `php artisan boost:install`. The command writes `.mcp.json`, and git ignores that file.
 
 ## Coding style
 
@@ -161,6 +164,22 @@ Playwright starts the app for the tests. First it writes `.env.e2e` from `.env.e
 - For a UI change, add screenshots from before and after the change.
 - Before you ask for a review, make sure that `php artisan test`, `vendor/bin/pint --test` and `npm run build` pass.
 - Write the follow-up work in the pull request description.
+
+## Pull request titles
+
+The title of each pull request must follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). The `pr-title` check fails when the title does not follow it.
+
+Use one of these types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore` or `revert`. The scope in parentheses is optional. Examples:
+
+- `feat: add a webhook for new comments`
+- `fix(widget): keep the session after a page reload`
+- `docs: explain the backup of the SQLite file`
+
+GitHub makes the release notes from the titles of the merged pull requests. A clear title gives a clear release note.
+
+## Triage
+
+Each new issue gets the `needs-triage` label. The maintainer reads the issue, adds a type label (for example `bug`, `enhancement` or `question`) and removes `needs-triage`.
 
 ## Release notes
 

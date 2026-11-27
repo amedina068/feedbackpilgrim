@@ -46,17 +46,27 @@ naming convention encodes which surface a controller serves.
 | **Admin dashboard** | App host (the `APP_URL` host, `config('app.host')`) | `auth` (User) | `PostController`, `ReleaseNoteController`, … | `routes/web.php`, `routes/auth.php` |
 | **Public client site** | Client subdomain | `auth:contact` (Contact) or none | `Client*` prefix (`ClientPostController`, `ClientRoadmapController`) | `routes/web.php` |
 | **Embeddable widgets** | Client subdomain | none | `Iframe*` prefix (`IframeReleaseNoteController`) | `routes/iframe.php` |
-| **Public REST API** | Main app domain, `/api/public/v1` | Sanctum token + `api_client` | `Api\V1\Public\*` | `routes/public-api.php` |
-| **MCP server** | Main app domain, `/mcp` | Sanctum bearer + `api_client` + `throttle:mcp` | `App\Mcp\*` (`PublicServer`, `*Tool`) | `routes/ai.php` |
+| **Public REST API** | Main app domain, `/api/public/v1` | Sanctum token with `api` + `api_client` | `Api\V1\Public\*` | `routes/public-api.php` |
+| **MCP server** | Main app domain, `/mcp` | Sanctum bearer with `mcp:read` or `mcp:write` + `api_client:mcp` + `throttle:mcp` | `App\Mcp\*` (`PublicServer`, `*Tool`) | `routes/ai.php` |
+
+**Instance-admin MCP server.** `App\Mcp\Servers\InstanceAdminServer` operates the whole
+instance (status, doctor, users, projects, tokens, settings, queue, errors, test email). It runs
+over stdio (`Mcp::local('fp-admin')`, started with `php artisan mcp:start fp-admin`, for example
+`ssh <host> docker exec -i <container> php artisan mcp:start fp-admin`). Only when
+`MCP_ADMIN_ENABLED=true` does it also answer at `/mcp/admin`. That route uses
+`EnsureInstanceAdminToken`: an active owner, a token with exactly `["instance:admin"]` (never
+`*`), and an expiry of 7 days or less. See "Agent-first surface".
 
 **Setup page and instance admin.** Two small surfaces on the app domain serve the operator.
 `SetupController` (`/setup`) creates the first owner while the `users` table is empty.
 `RedirectToSetup` (alias `setupRedirect`, on the app-domain route group) sends `GET /`,
 `GET /login` and every `/register` request there until then. The form needs a token from
 `App\Support\InstanceSetup` (HMAC-SHA256 of `feedbackpilgrim-setup` with `APP_KEY`, cut to
-32 characters). `App\Actions\Instance\CreateInstanceOwner` takes a cache lock and checks
+32 characters). Without the correct token in the query, `/setup` shows no form. It shows the
+commands that print the setup URL, and a field for the token or the full URL.
+`App\Actions\Instance\CreateInstanceOwner` takes a cache lock and checks
 again inside the transaction, so only one owner is created. After the first user exists,
-`/setup` returns 404. The admin area (`/admin/users`, `/admin/settings`,
+`GET /setup` redirects to `/login` with a message, and `POST /setup` returns 404. The admin area (`/admin/users`, `/admin/settings`,
 `App\Http\Controllers\Admin\*`) is open only to a User with `is_owner`. `EnsureUserIsOwner`
 (alias `owner`) gives everyone else a 404.
 
@@ -157,6 +167,13 @@ returns `docs/api/postman_collection.json`. The API Tokens settings page links t
   attaches it to the request; 401 if absent, or if the token user is not in `client_user` for
   the token client. `ClientContext::fromToken()` is the single
   token→identity resolver for both transports (no controller reads the raw token directly).
+  It also checks the abilities: the REST API needs `api`, and `/mcp` needs `mcp:read` or
+  `mcp:write` (403 `insufficient_ability` without them). Each MCP tool then needs `mcp:read`
+  (tools with `readOnlyHint`) or `mcp:write`. A tool without its ability does not register for
+  the token (`ResolvesClientContext::shouldRegister()`), so `tools/list` hides it and a call
+  gets "tool not found". Tokens from before the abilities have `*`, which Sanctum treats as
+  every ability, so they keep working. `App\Support\ApiTokens` creates tokens: product tokens
+  get only `mcp:read`, `mcp:write` and `api`, and an optional `expires_at`.
 
 ### Two authenticatables / two guards
 
@@ -285,7 +302,8 @@ User ──many-to-many (client_user)── Client ──< everything below is c
 - **Board** — per-client collection a Post belongs to (`name`, `slug`, `position`, `is_public`).
   Posts are board-scoped (`posts.board_id`); **stages are shared client-wide** (not board-scoped).
   Every client is seeded one default board (`Board::seedDefaultFor` from `Client::booted`,
-  `Feature Requests`); new posts auto-attach to the client's first board (`Post::creating`).
+  `Feature Requests`); new posts auto-attach to the client's first public board, or to the first board if no board is
+  public (`Post::creating`). A contact whose new post lands on a private board goes to `/posts`.
   Boards are managed at `/boards` (`BoardController`), the admin nav's "Boards" entry; each row
   links to that board's kanban. The admin Posts list exposes board filter tabs and a "Manage
   boards" link.
@@ -418,10 +436,59 @@ thin service layer for metrics and shared traits for cross-cutting concerns.
   (`fp:weekly`) every Monday 09:00. It reports the previous week, Monday to Sunday. Other commands: `SyncContactAttributes`
   (`fp:sync-contact-attributes`), `SetupTestimonialRatingSettings`, `InstallCommand` (`fp:install`,
   with `--prepare` and `--promote`), `SetupUrlCommand` (`fp:setup-url`), `UserListCommand`
-  (`fp:user:list`) and `UserPasswordCommand` (`fp:user:password`).
+  (`fp:user:list`), `UserPasswordCommand` (`fp:user:password`), and the agent commands in
+  "Agent-first surface".
+  The `fp:heartbeat` closure runs every minute. It writes the scheduler heartbeat to the cache
+  and queues `RecordQueueHeartbeat`, which writes the queue heartbeat (`App\Support\Heartbeats`).
   `sending-domains:check` (`CheckSendingDomains`) runs every 10 minutes with
   `withoutOverlapping()`. It checks pending domains, and verified domains that had no check in
   the last 24 hours. It skips failed domains.
+
+## Agent-first surface
+
+An AI agent can install, check and run an instance without a browser.
+
+**The command contract.** Each `fp:` command takes `--json` and `--no-interaction`
+(`App\Console\Concerns\InteractsWithAgents`). With `--json`, stdout holds one JSON object:
+`{"ok", "command", "schema": 1, "data", "errors": [{"code", "message", "fix"}]}`. Messages go to
+stderr. The exit codes are 0 (success or no change), 1 (a check or an action failed), 2 (bad
+input) and 3 (conflict) (`App\Console\Concerns\AgentExit`).
+
+| Command | Purpose |
+|---------|---------|
+| `fp:install --name --email [--project] [--subdomain] [--with-token=<name>]` | Creates the owner and the first project. It needs no password. It returns a one-time `login_url`. With `--with-token`, it also returns a product token and a `connect` object (`claude mcp add` and `codex mcp add` lines). A second run returns `"status": "exists"` and exits 0. Another email on a used instance exits 3. `--password` and `--client-name` still work but are deprecated. |
+| `fp:status` | Version, app URL, database driver and reachability, pending migrations, queue and scheduler heartbeats, storage link, mailer, MCP URLs, owner. Exits 1 when the database is not reachable. |
+| `fp:doctor [--fix]` | A list of `{id, status: ok\|warn\|fail, message, fix, fixed}` (`App\Support\InstanceDoctor`). `--fix` runs only safe fixes (the storage link). It never runs migrations. |
+| `fp:token:create --user --name [--project] [--abilities] [--expires] [--admin]` | A product token, or with `--admin` an owner token with only `instance:admin` (1 day by default, 7 days at most). |
+| `fp:token:list [--user]`, `fp:token:revoke <id>` | List (never the token value, `legacy` for `*`) and revoke. |
+| `fp:mcp:connect --client=claude\|codex\|cursor\|json [--token=new]` | The connect command or config (`App\Support\McpConnect`). The lines read the token from `FP_TOKEN`. |
+
+`fp:setup-url`, `fp:user:list`, `fp:user:password` and `fp:weekly` also take `--json`. Without
+`--json`, `fp:setup-url` still prints only the URL, because the Docker entrypoint reads it.
+
+**One-time login link.** `App\Support\LoginLink` makes a temporary signed URL to
+`GET /login/link/{user}` (`LoginLinkController`). The URL holds a hash of the remember token of
+the user. The first use rotates that token, so the link works one time. A logout and
+`fp:user:password` also end all open links. After the login, the session key
+`login_link.can_set_password` lets the user set a password on the profile page without the
+current one, one time. `fp:install` links work for 60 minutes. `invite-user` links work for 7 days.
+
+**Instance-admin MCP tools.** `get-instance-status`, `run-doctor`, `list-users`, `invite-user`,
+`list-projects`, `create-project`, `list-api-tokens`, `create-api-token` (product abilities
+only), `revoke-api-token`, `get-settings`, `set-setting` (allowlist: `registration_mode`),
+`get-queue-health`, `retry-failed-jobs`, `read-recent-errors` (first line of each error, secrets
+removed) and `send-test-email`. Each tool has `readOnlyHint` or `destructiveHint`. A destructive
+tool returns a preview and changes nothing until a second call with `confirm: true`.
+`App\Mcp\Concerns\AuditsAdminCalls` writes one JSON line for each call to the `mcp-admin` log
+channel (`storage/logs/mcp-admin-*.log`, 90 days), with the secret arguments removed. The
+`activity_log` table is not used, because each of its rows needs a project and the project
+dashboard shows it. These actions stay CLI-only: create the owner, promote or demote a user,
+rotate keys, revoke all tokens, delete data.
+
+**Discovery.** `GET /llms.txt` and `GET /skill.md` (`AgentDocsController`) render on each
+request. `LlmsTxtGenerator` reads the guides and `public/docs/openapi.json`, and it has an
+"Install with an agent" section. `SkillFileGenerator` adds frontmatter to
+`PublicServer::WORKFLOW`, the same text that the MCP server sends as its instructions.
 
 ## Onboarding
 
@@ -599,19 +666,30 @@ and the iframe share one query via `App\Support\RoadmapData::build`.
 
 - `APP_URL` — URL of the dashboard. Its host is the app host, and the admin routes in
   `routes/web.php` bind to it. `Client::public_site` uses its scheme for the client subdomains.
+  Not set: `https://APP_DOMAIN`, or `http://localhost:8080` when `APP_DOMAIN` is also not set.
 - `APP_DOMAIN` — base domain for client boards (`<slug>.APP_DOMAIN`), so the DNS needs a
   wildcard record. It can equal the app host (local) or be its parent (production: app on
   `app.feedbackpilgrim.com`, boards on `<slug>.feedbackpilgrim.com`). The slugs in
-  `Client::RESERVED_SLUGS` are not client boards.
+  `Client::RESERVED_SLUGS` are not client boards. Not set: the host of `APP_URL`.
+  `App\Support\InstanceUrl` derives `APP_URL`, `APP_DOMAIN`, `SESSION_DOMAIN`,
+  `SESSION_SECURE_COOKIE` and `SANCTUM_STATEFUL_DOMAINS` when they are not set or empty. A value in
+  `.env` always wins. `App\Support\ClientHost` maps a host to its client (the
+  `IdentifyClientMiddleware` and the Caddy `ask` route use it).
+- `RedirectLoopbackHost` (global middleware) sends a GET to `127.0.0.1` or `[::1]` to the same
+  path on the app host, with the same port. It does not touch `/up` and `/caddy/ask`.
+- `APP_KEY` — not set or empty: the app reads `APP_KEY_FILE` (default `/data/.secrets/app_key`).
+  The Docker image writes that file on the first boot.
 - `REGISTRATION_ENABLED` — `false` by default. It is only the default of the registration
   mode. The owner stores `open` or `closed` in `/admin/settings`, and the stored value wins
   (`App\Support\Registration`). `RegistrationEnabledMiddleware` (alias `registrationEnabled`)
   returns 404 on `/register` when the mode is `closed`. The setup page or `fp:install` creates
   the owner, the first client and the admin contact on an empty database.
-- `SESSION_DOMAIN` — set to `.APP_DOMAIN` to share the dashboard session with the client
-  subdomains (`adminContactLogin` needs it).
+- `SESSION_DOMAIN` — `.APP_DOMAIN` shares the dashboard session with the client subdomains
+  (`adminContactLogin` needs it). Not set: `.APP_DOMAIN`, or no domain for `localhost` and IP
+  addresses.
 - `SANCTUM_STATEFUL_DOMAINS` — domains allowed cookie-based stateful API auth
-  (`APP_DOMAIN,*.APP_DOMAIN`).
+  (`APP_DOMAIN,*.APP_DOMAIN`). Not set: the local hosts, the app host, `APP_DOMAIN` and
+  `*.APP_DOMAIN`, each with the port of `APP_URL`.
 - `TRUSTED_PROXIES` — the proxies whose `X-Forwarded-*` headers the app trusts, as a
   comma-separated list of IP addresses or CIDR ranges. `config/trustedproxy.php` reads it, and
   an empty value means the Cloudflare ranges (the production setup). `bootstrap/app.php` calls
@@ -631,49 +709,82 @@ and the iframe share one query via `App\Support\RoadmapData::build`.
   optional `AWS_SES_CONFIGURATION_SET` adds an SES configuration set to each email from the `ses`
   mailer. One platform-owned AWS account sends for all clients. Clients do not give AWS keys.
 - Cache store for the sending domain lock — the `LocksSendingDomain` trait uses a cache lock.
-  If the app runs on more than one server, use a shared cache store (`redis` or `database`).
+  If the app runs on more than one server, use a shared cache store (`redis` or `database`). The `HandlesInitRequests` login time uses the cache store too.
   A local store (`file`, `array`) locks only on one server.
 
 ## Deployment (Docker)
 
 - `Dockerfile` — multi-stage build on `serversideup/php:8.3-fpm-nginx` (pinned release). Stages:
-  `vendor` (`composer install --no-dev`), `assets` (`npm run build`, which makes `public/build`
-  and `public/pilgrim.js`), and `app`. The image adds the `gd` and `exif` extensions, listens
-  on port 8080 and runs as `www-data`.
-- `docker-compose.yml` — `web`, `queue` (`queue:work`), `scheduler` (`schedule:work`), `mysql`
-  (MySQL 8.4) and `redis`. Only `web` sets `AUTORUN_ENABLED=true`, so only `web` runs
-  `storage:link`, the migrations and `optimize` at startup. `queue` and `scheduler` wait for a
-  healthy `web`.
-  `web` publishes port `APP_PORT` (8080) on `APP_BIND` (default `127.0.0.1`), so only a proxy
-  on the host reaches it.
-- `docker-compose.image.yml` — the same stack as `docker-compose.yml`, but the app services use
-  the published image `ghcr.io/amedina068/feedbackpilgrim` (tag `FEEDBACKPILGRIM_VERSION`, default
-  `latest`) and do not build. Change both files together.
+  `caddy` (copies the Caddy binary), `vendor` (`composer install --no-dev`), `assets`
+  (`npm run build`, which makes `public/build` and `public/pilgrim.js`), and `app`. The image adds
+  the `gd` and `exif` extensions and the `sqlite3` and `mariadb-client` clients (Laravel loads a
+  schema dump with them). It listens on port 8080 and runs as `www-data`.
+- One container runs everything with s6-overlay: NGINX, PHP-FPM, `queue:work`, `schedule:work`,
+  Caddy and `fp-ready` (`deploy/docker/s6-rc.d`). The migrations run before s6 starts the
+  services (`AUTORUN_ENABLED=true`). `FP_QUEUE_WORKER=false` or `FP_SCHEDULER=false` turns off one
+  worker. `fp-ready` waits for `/up`, then prints the last lines of the boot:
+  `✓ Feedback Pilgrim is ready (Ns)` and `→ Open <setup URL or app URL>`.
+- Defaults of the image: SQLite in `/data/database.sqlite` (WAL, `busy_timeout` 5000,
+  `synchronous` normal, `IMMEDIATE` transactions, from `DB_*` variables), and the `database`
+  cache, session and queue drivers. Their tables come from
+  `2026_11_25_000100_create_database_driver_tables`. MySQL and Redis stay supported through the
+  normal `DB_*`, `REDIS_*` and `*_DRIVER` variables.
+- `/data` volume: the SQLite file, `.secrets/app_key`, `storage/app` (the image links
+  `storage/app` to `/data/storage/app`) and `caddy/` (certificates).
+  `deploy/docker/entrypoint.d/20-feedbackpilgrim-data.sh` runs before `50-laravel-automations`.
+  It makes the folders, the `APP_KEY` file (mode 600, one time) and the empty SQLite file.
+- Caddy — when `APP_DOMAIN` is set (`CADDY_ENABLED=auto`), Caddy serves ports 80 and 443 with
+  on-demand TLS and proxies to NGINX on 8080. Before each certificate it calls `/caddy/ask`
+  (`CaddyAskController`), which answers 200 only for the app host, `APP_DOMAIN` and the subdomain
+  of a client with an active user. The app always trusts `127.0.0.1` and `::1` as proxies
+  (`config/trustedproxy.php`). The image keeps NGINX and PHP-FPM instead of FrankenPHP, so that
+  the PHP runtime of existing installs does not change.
+- Schema dumps — `database/schema/sqlite-schema.sql` and `mysql-schema.sql` (made with
+  `schema:dump`, no `--prune`). `scripts/check-schema-dump.sh` and the `schema-dump` CI job make
+  sure that they match the migrations. The image has `/var/www/.sqliterc` with
+  `synchronous=NORMAL`, so the `sqlite3` client loads the dump in 0.2 s. The image has
+  `/etc/mysql/conf.d/feedbackpilgrim-client.cnf` (`deploy/docker/mysql-client.cnf`) with
+  `ssl-verify-server-cert = 0` for the `mysql` and `mysqldump` clients only. Thus the MariaDB 11.8
+  client loads `mysql-schema.sql` into the compose MySQL 8.4, which has a self-signed
+  certificate. PDO does not read the file. `deploy/README.md` tells why the check is off.
+- The SQLite email columns (`users.email`, `contacts.email`) use `COLLATE NOCASE`, like the
+  case-insensitive collation of MySQL (`2026_11_25_000200_make_emails_case_insensitive_on_sqlite`,
+  no change on MySQL). The migration runs outside a transaction, so the table rebuild can turn
+  off the foreign keys.
+- `docker-compose.yml` — one `web` service (the image) and, with the `mysql` profile
+  (`COMPOSE_PROFILES=mysql` in `.env`, or `--profile mysql`), the `mysql` (MySQL 8.4) and `redis`
+  services. `.env` is optional. `web` waits for healthy `mysql` and `redis` only when the
+  profile is active (`required: false`). Its health check has a `start_period` of 300 s, for a
+  first install on MySQL. `web` publishes port `APP_PORT` (8080) on `APP_BIND` (default
+  `127.0.0.1`), so only a proxy on the host reaches it. Caddy is off by default in compose
+  (`CADDY_ENABLED=false`). The volumes are `data` (`/data`) and `storage` (`/data/storage/app`,
+  the uploads volume of older versions).
+- `docker-compose.image.yml` — the same stack as `docker-compose.yml`, but `web` uses the
+  published image `ghcr.io/amedina068/feedbackpilgrim` (tag `FEEDBACKPILGRIM_VERSION`, default
+  `latest`) and does not build. Change both files together.
 - `.github/workflows/docker-publish.yml` — runs only on a `v*` tag. It builds the `Dockerfile`
-  for `linux/amd64` and `linux/arm64` and pushes it to GHCR. `.github/workflows/ci.yml` runs
-  Pint, the PHP tests (SQLite in memory), Larastan (`composer analyse`), `composer audit --locked`,
+  for `linux/amd64` and `linux/arm64` and pushes it to GHCR with the tags `x.y.z`, `x.y`, `x` and
+  `latest`. `.github/workflows/ci.yml` runs
+  Pint, the PHP tests on SQLite in memory and on MySQL 8.4 (a matrix), the schema dump check
+  (SQLite and MySQL), Larastan (`composer analyse`), `composer audit --locked`,
   the JS build with the node:test JS tests, the Vitest unit tests (`npm run test:unit`), the API
   docs drift check, and the Playwright E2E tests (Chromium) on each push to
   `main` and each pull request. If the E2E job fails, it uploads the Playwright report and the
   traces as the `playwright-report` artifact. The jobs cache the Composer and npm downloads
   and need no repository secrets. A new push to a pull request stops the old run of that pull
   request. A push to `main` does not stop an old run.
-- `deploy/docker/entrypoint.d/60-feedbackpilgrim-setup.sh` — the image copies it to
-  `/etc/entrypoint.d`. It acts only when `FP_PREPARE_ON_START=true`, which only `web` sets. It
-  runs `fp:install --prepare` and, while no user exists, prints the setup URL to the log.
 - `deploy/nginx`, `deploy/caddy`, `deploy/systemd`, `deploy/supervisor` — example files for an
   install without Docker (web server, queue worker, scheduler) and for a proxy in front of the
   stack. `deploy/README.md` lists them. Keep their commands equal to the `queue` and
-  `scheduler` services.
+  `scheduler` s6 services of the image.
 - Health checks — the image requests `HEALTHCHECK_PATH=/up`. `bootstrap/app.php` registers
   `/up` (`Illuminate\Foundation\Http\HealthCheck`) in the `using:` callback, because
   `withRouting()` ignores `health:` when `using:` is set. `/up` has no domain, so it answers on
-  any host. The workers use `healthcheck-queue` and `healthcheck-schedule`.
+  any host. The image health check uses `/up` on `127.0.0.1:8080`.
 - `optimize` caches the routes, so route names must be unique. The Public API resource routes
   use the `public-api.` name prefix (`routes/public-api.php`). `tests/Feature/RouteNamesTest`
   guards this.
-- Uploads live in the `storage` volume (`storage/app`). Logs go to `stderr` (`LOG_STACK=stderr`
-  in the image).
+- Uploads live in `/data/storage/app`. Logs go to `stderr` (`LOG_STACK=stderr` in the image).
 
 ## Testing
 

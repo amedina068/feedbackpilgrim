@@ -3,12 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 /**
@@ -42,7 +40,7 @@ class UserPasswordCommandTest extends TestCase
             ->expectsQuestion('New password', 'a-long-password-1')
             ->expectsQuestion('Type the new password again', 'a-long-password-2')
             ->expectsOutputToContain('The two passwords are not the same.')
-            ->assertFailed();
+            ->assertExitCode(2);
 
         $this->assertSame($before, $user->fresh()->password);
     }
@@ -96,7 +94,7 @@ class UserPasswordCommandTest extends TestCase
         $this->artisan('fp:user:password', [
             'email' => 'lost@example.com',
             '--password' => 'short',
-        ])->expectsOutputToContain('at least 8 characters')->assertFailed();
+        ])->expectsOutputToContain('at least 8 characters')->assertExitCode(2);
 
         $this->assertSame($before, $user->fresh()->password);
     }
@@ -106,7 +104,7 @@ class UserPasswordCommandTest extends TestCase
         $this->artisan('fp:user:password', [
             'email' => 'nobody@example.com',
             '--password' => 'a-long-password-1',
-        ])->expectsOutputToContain('No user has the email nobody@example.com.')->assertFailed();
+        ])->expectsOutputToContain('No user has the email nobody@example.com.')->assertExitCode(2);
     }
 
     public function test_it_refuses_the_password_and_the_generate_options_together(): void
@@ -118,7 +116,7 @@ class UserPasswordCommandTest extends TestCase
             'email' => 'lost@example.com',
             '--password' => 'a-long-password-1',
             '--generate' => true,
-        ])->expectsOutputToContain('Use --password or --generate, not the two together.')->assertFailed();
+        ])->expectsOutputToContain('Use --password or --generate, not the two together.')->assertExitCode(2);
 
         $this->assertSame($before, $user->fresh()->password);
     }
@@ -129,7 +127,7 @@ class UserPasswordCommandTest extends TestCase
 
         $this->artisan('fp:user:password', ['email' => 'lost@example.com', '--no-interaction' => true])
             ->expectsOutputToContain('Give --password or --generate')
-            ->assertFailed();
+            ->assertExitCode(2);
     }
 
     public function test_it_rotates_the_remember_token(): void
@@ -147,7 +145,6 @@ class UserPasswordCommandTest extends TestCase
     public function test_it_ends_the_database_sessions_of_the_user(): void
     {
         config(['session.driver' => 'database']);
-        $this->createSessionsTable();
 
         $user = User::factory()->create(['email' => 'lost@example.com']);
         $other = User::factory()->create();
@@ -176,17 +173,5 @@ class UserPasswordCommandTest extends TestCase
             'email' => 'lost@example.com',
             '--password' => 'a-long-password-1',
         ])->expectsOutputToContain('The "redis" session driver')->assertSuccessful();
-    }
-
-    private function createSessionsTable(): void
-    {
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
-        });
     }
 }
