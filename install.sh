@@ -9,9 +9,14 @@
 #
 # Options:
 #   --domain=<host>      Use this domain. The script does not ask.
+#   --install-docker     If Docker is missing, install it. The script does not ask.
 #   --non-interactive    Ask nothing. Read the domain from APP_DOMAIN.
 #   --dry-run            Print each docker command. Change nothing.
 #   --help               Show this help.
+#
+# If Docker is missing on Linux, the script offers to install it with the
+# official script from get.docker.com. If your user cannot use Docker, the
+# script uses sudo for the docker commands.
 #
 # Environment variables:
 #   APP_DOMAIN           The domain, for example feedback.example.com.
@@ -41,6 +46,8 @@ FP_WAIT_SECONDS="${FP_WAIT_SECONDS:-300}"
 
 DRY_RUN=false
 INTERACTIVE=true
+INSTALL_DOCKER=false
+DOCKER_SUDO=false
 DOMAIN="${APP_DOMAIN:-}"
 DOMAIN_FROM_FLAG=false
 TOTAL_STEPS=6
@@ -110,6 +117,13 @@ die() {
     exit 1
 }
 
+# The last error line in the install log, for the message of a failed step.
+last_error() {
+    grep -iE 'error|failed|denied|no space|timeout|refused' "$FP_LOG_FILE" 2>/dev/null \
+        | grep -vE '^[0-9T:-]+ (RUN|PROBE|STEP|INFO|WARN) ' \
+        | tail -n 1 | cut -c1-300 || true
+}
+
 # A failed check stops the install. In a dry run, the script shows a warning
 # and continues, so that you can read all the commands.
 check_failed() {
@@ -150,14 +164,64 @@ probe() {
     "$@" 2>>"$FP_LOG_FILE"
 }
 
+# Runs docker. When the user cannot use the Docker socket, it runs sudo docker.
+# sudo runs the docker binary, not this function. That is the purpose.
+# shellcheck disable=SC2032,SC2033
+docker() {
+    if [ "$DOCKER_SUDO" = true ]; then
+        sudo docker "$@"
+    else
+        command docker "$@"
+    fi
+}
+
+# The docker command to show in a message.
+docker_cmd() {
+    if [ "$DOCKER_SUDO" = true ]; then
+        printf 'sudo docker'
+    else
+        printf 'docker'
+    fi
+}
+
+has_docker_binary() {
+    type -P docker >/dev/null 2>&1
+}
+
+# Runs a command as root: directly, or with sudo.
+as_root() {
+    if [ "$(id -u)" -eq 0 ]; then
+        "$@"
+    else
+        sudo "$@"
+    fi
+}
+
+can_be_root() {
+    [ "$(id -u)" -eq 0 ] || type -P sudo >/dev/null 2>&1
+}
+
+# Asks a yes or no question. Enter means yes. With no terminal, the answer is no.
+confirm() {
+    [ "$INTERACTIVE" = true ] || return 1
+    local answer
+    printf '      %s [Y/n] ' "$1"
+    read -r answer </dev/tty || answer=""
+    case "$answer" in
+        "" | y | Y | yes | YES | Yes) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
 usage() {
     cat <<'EOF'
 Installs Feedback Pilgrim on a server with Docker.
 
-Usage: install.sh [--domain=<host>] [--non-interactive] [--dry-run]
+Usage: install.sh [--domain=<host>] [--install-docker] [--non-interactive] [--dry-run]
 
 Options:
   --domain=<host>      Use this domain. The script does not ask.
+  --install-docker     If Docker is missing, install it. The script does not ask.
   --non-interactive    Ask nothing. Read the domain from APP_DOMAIN.
   --dry-run            Print each docker command. Change nothing.
   --help               Show this help.
@@ -183,6 +247,7 @@ parse_args() {
         case "$1" in
             --dry-run) DRY_RUN=true ;;
             --non-interactive) INTERACTIVE=false ;;
+            --install-docker) INSTALL_DOCKER=true ;;
             --domain=*)
                 DOMAIN="${1#*=}"
                 DOMAIN_FROM_FLAG=true
@@ -243,6 +308,96 @@ ask_domain() {
 # Steps
 # ---------------------------------------------------------------------------
 
+# Installs Docker with the official script from get.docker.com. It asks
+# first, unless --install-docker is set. It returns 1 when Docker stays missing.
+install_docker() {
+    if [ "$(uname -s)" != "Linux" ]; then
+        check_failed "Docker is not installed." "Install Docker Desktop from https://docs.docker.com/get-started/get-docker/ and run the script again."
+        return 1
+    fi
+    if ! can_be_root; then
+        check_failed "Docker is not installed, and your user cannot use sudo." "Install Docker as root: curl -fsSL https://get.docker.com | sh"
+        return 1
+    fi
+    if ! type -P curl >/dev/null 2>&1; then
+        check_failed "Docker is not installed, and curl is not installed." "Install curl, then run the script again."
+        return 1
+    fi
+    if [ "$INSTALL_DOCKER" != true ] && ! confirm "Docker is not installed. Install it now with the official script from get.docker.com?"; then
+        check_failed "Docker is not installed." "Run the script again and answer yes, or add --install-docker. You can also install Docker yourself: curl -fsSL https://get.docker.com | sh"
+        return 1
+    fi
+
+    info "Install Docker. This takes one or two minutes."
+    local script
+    script="$(mktemp "${TMPDIR:-/tmp}/feedbackpilgrim-get-docker.XXXXXX")"
+    run curl -fsSL https://get.docker.com -o "$script" \
+        || die "The script cannot download https://get.docker.com." "Make sure that the server can reach get.docker.com. Then run the script again."
+    run as_root sh "$script" \
+        || die "The Docker install failed." "Read the install log. Then install Docker yourself: curl -fsSL https://get.docker.com | sh"
+    rm -f "$script"
+
+    # The docker group applies only to a new login, so this session uses sudo.
+    if [ "$(id -u)" -ne 0 ]; then
+        DOCKER_SUDO=true
+    fi
+    start_docker_daemon
+    info "Docker is installed."
+}
+
+start_docker_daemon() {
+    if [ -d /run/systemd/system ] && type -P systemctl >/dev/null 2>&1; then
+        run as_root systemctl enable --now docker || true
+    elif type -P service >/dev/null 2>&1; then
+        run as_root service docker start || true
+    fi
+}
+
+# Makes sure that the Docker daemon answers. It uses sudo when the user cannot
+# use the Docker socket, and it starts the daemon when it is stopped.
+docker_answers() {
+    local output attempt
+    # A dry run does not install Docker.
+    has_docker_binary || return 1
+    for attempt in 1 2 3; do
+        # Not probe: probe sends stderr to the log, and the error text tells
+        # a denied socket from a stopped daemon.
+        log "PROBE $(docker_cmd) info"
+        if [ "$DRY_RUN" = true ]; then
+            printf '      %s$ %s info --format {{.ServerVersion}}%s\n' "$DIM" "$(docker_cmd)" "$RESET" >&3
+        fi
+        if output="$(docker info --format '{{.ServerVersion}}' 2>&1)"; then
+            info "Docker: $output"
+            return 0
+        fi
+        log "docker info: $output"
+        case "$output" in
+            *"permission denied"*)
+                if [ "$DOCKER_SUDO" = true ] || ! can_be_root; then
+                    check_failed "Your user cannot use Docker." "Run the script with sudo, or add your user to the docker group."
+                    return 1
+                fi
+                info "Your user cannot use Docker. The script uses sudo for the docker commands."
+                DOCKER_SUDO=true
+                ;;
+            *)
+                if [ "$attempt" -eq 1 ] && can_be_root; then
+                    info "The Docker daemon does not answer. Start it."
+                    start_docker_daemon
+                    sleep 2
+                elif [ "$attempt" -eq 3 ] || ! can_be_root; then
+                    check_failed "The Docker daemon does not answer." "Start Docker: sudo systemctl start docker"
+                    return 1
+                else
+                    sleep 3
+                fi
+                ;;
+        esac
+    done
+    check_failed "The Docker daemon does not answer." "Start Docker: sudo systemctl start docker"
+    return 1
+}
+
 check_system() {
     step "Check the system"
 
@@ -256,24 +411,16 @@ check_system() {
     esac
     info "System: $os $arch"
 
-    if ! command -v docker >/dev/null 2>&1; then
-        check_failed "Docker is not installed." "Install Docker: curl -fsSL https://get.docker.com | sh"
-        step_done "Checked"
-        return
+    if ! has_docker_binary; then
+        if ! install_docker; then
+            step_done "Checked"
+            return
+        fi
     fi
 
-    local docker_output
-    if docker_output="$(probe docker info --format '{{.ServerVersion}}' 2>&1)"; then
-        info "Docker: $docker_output"
-    else
-        case "$docker_output" in
-            *"permission denied"*)
-                check_failed "Your user cannot use Docker." "Run the script with sudo, or add your user to the docker group."
-                ;;
-            *)
-                check_failed "The Docker daemon does not answer." "Start Docker: sudo systemctl start docker"
-                ;;
-        esac
+    if ! docker_answers; then
+        step_done "Checked"
+        return
     fi
 
     local compose_version
@@ -314,7 +461,7 @@ container_ports() {
 check_ports() {
     step "Check the ports"
 
-    if command -v docker >/dev/null 2>&1 && probe docker container inspect "$FP_CONTAINER" >/dev/null 2>&1; then
+    if has_docker_binary && probe docker container inspect "$FP_CONTAINER" >/dev/null 2>&1; then
         EXISTING_CONTAINER=true
         info "The container \"$FP_CONTAINER\" exists. The script replaces it. The data in the volume stays."
     fi
@@ -379,13 +526,20 @@ pull_image() {
         return
     fi
 
+    # Read the error of the pull before the next command adds its own lines.
+    local reason
+    reason="$(last_error)"
+
     if probe docker image inspect "$FP_IMAGE:$FP_VERSION" >/dev/null 2>&1; then
         warn "The download failed. The script uses the local copy of the image."
         step_done "Local image"
         return
     fi
 
-    die "Docker cannot download $FP_IMAGE:$FP_VERSION." "Make sure that the server can reach ghcr.io. Then run the script again."
+    if [ -n "$reason" ]; then
+        info "Docker said: $reason"
+    fi
+    die "Docker cannot download $FP_IMAGE:$FP_VERSION." "Make sure that the server can reach ghcr.io and has free disk space. Then run the script again."
 }
 
 start_container() {
@@ -432,7 +586,7 @@ wait_until_ready() {
     while [ "$SECONDS" -lt "$deadline" ]; do
         if [ "$(docker inspect -f '{{.State.Running}}' "$FP_CONTAINER" 2>/dev/null)" != "true" ]; then
             docker logs --tail 40 "$FP_CONTAINER" >>"$FP_LOG_FILE" 2>&1 || true
-            die "The container stopped." "Read the log of the container: docker logs $FP_CONTAINER"
+            die "The container stopped." "Read the log of the container: $(docker_cmd) logs $FP_CONTAINER"
         fi
         if docker exec "$FP_CONTAINER" curl -fsS -o /dev/null http://127.0.0.1:8080/up >/dev/null 2>&1; then
             step_done "The app answers"
@@ -442,7 +596,7 @@ wait_until_ready() {
     done
 
     docker logs --tail 40 "$FP_CONTAINER" >>"$FP_LOG_FILE" 2>&1 || true
-    die "The app did not answer in $FP_WAIT_SECONDS seconds." "Read the log of the container: docker logs $FP_CONTAINER"
+    die "The app did not answer in $FP_WAIT_SECONDS seconds." "Read the log of the container: $(docker_cmd) logs $FP_CONTAINER"
 }
 
 read_setup_url() {
@@ -495,7 +649,7 @@ summary() {
     fi
     lines+=("")
     lines+=("Connect an AI agent:")
-    lines+=("  docker exec $FP_CONTAINER php artisan fp:mcp:connect --client=claude")
+    lines+=("  $(docker_cmd) exec $FP_CONTAINER php artisan fp:mcp:connect --client=claude")
 
     local width=0 line
     for line in "${lines[@]}"; do

@@ -45,7 +45,7 @@ Then run the installer on the server:
 curl -fsSL https://raw.githubusercontent.com/amedina068/feedbackpilgrim/main/install.sh | bash
 ```
 
-The installer asks for one value, the domain. It checks Docker and the ports, starts the container and shows the setup URL.
+The installer asks for one value, the domain. If Docker is missing on Linux, it offers to install it. Then it checks the ports, starts the container and shows the setup URL. On a new server, the full install takes about one minute.
 
 To start the container yourself, set `APP_DOMAIN` and publish ports 80 and 443:
 

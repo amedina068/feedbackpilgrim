@@ -50,6 +50,21 @@ jobs:
       - name: Check code style
         run: vendor/bin/pint --test
 
+  installer:
+    name: Installer (ShellCheck and tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The runner image has ShellCheck.
+      - name: Check the scripts with ShellCheck
+        run: shellcheck install.sh tests/install/installer-test.sh
+
+      # The tests use stub commands. They need no Docker and change nothing.
+      - name: Run the installer tests
+        run: bash tests/install/installer-test.sh
+
   tests:
     name: PHP tests (${{ matrix.db }})
     runs-on: ubuntu-latest
