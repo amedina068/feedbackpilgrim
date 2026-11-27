@@ -10,6 +10,7 @@ This file lists the changes to the code for each release. The release notes for 
 
 ### Fixed
 
+- A **Log out** button in the dashboard sidebar and in the mobile menu. Before, the dashboard had no way to end the session.
 - A new post without a board goes to the first public board. Before, a contact post from the public site or the widget went to a private board when that board came first. If no board is public, the post goes to the first board, and the contact goes back to the post list.
 - The status badge on the public posts list, the home page and the post page shows the name of the stage of the post. Before, a post in the "Planned" stage showed "In Progress", and a post in the "Complete" stage showed "Shipped". A post in an open or a closed stage shows no badge, as before.
 
