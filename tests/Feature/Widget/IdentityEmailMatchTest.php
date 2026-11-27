@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Contact;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -26,7 +27,9 @@ class IdentityEmailMatchTest extends TestCase
             return;
         }
 
-        $fold = fn (string $value): string => strtolower((string) iconv('UTF-8', 'ASCII//TRANSLIT', $value));
+        // Str::ascii() gives the same result on every platform. The iconv
+        // transliteration of macOS turns "é" into "'e", not "e".
+        $fold = fn (string $value): string => strtolower(Str::ascii($value));
 
         // The email columns use NOCASE on SQLite. The other text columns use BINARY.
         foreach (['BINARY', 'NOCASE'] as $collation) {
