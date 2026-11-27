@@ -36,9 +36,9 @@ docker info --format '{{.ServerVersion}}'
 ```
 
 - `uname -m` must print `x86_64` or `aarch64`. If not, stop. The image supports only amd64 and arm64.
-- If `docker` is not found, ask the human for approval. Then install Docker with `curl -fsSL https://get.docker.com | sh`.
-- If `docker info` prints `permission denied`, run the next commands with `sudo`.
-- If `docker info` cannot connect to the daemon, run `sudo systemctl start docker`.
+- If `docker` is not found, ask the human for approval. Then add `--install-docker` to the command in step 3. The installer installs Docker with the official script from get.docker.com.
+- If `docker info` prints `permission denied`, the installer uses `sudo` for the docker commands. Run the commands of step 4 with `sudo docker`.
+- If `docker info` cannot connect to the daemon, the installer starts it.
 
 ## 3. Start the container
 

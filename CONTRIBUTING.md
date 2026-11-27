@@ -93,6 +93,7 @@ The seeders create the owner `test@example.com` with the password `password`, an
 | `php artisan migrate` | Run the migrations |
 | `php artisan db:seed` | Add example data |
 | `shellcheck install.sh` | Check the installer script. Then run `bash install.sh --dry-run` to see each docker command. |
+| `bash tests/install/installer-test.sh` | Run the installer tests. They use stub commands, so they need no Docker. |
 | `composer api-docs` | Make `public/docs/openapi.json` and the Postman files again from `docs/api/openapi.yaml` |
 
 Laravel Boost is a development dependency. To use its MCP tools in your editor, run `php artisan boost:install`. The command writes `.mcp.json`, and git ignores that file.
