@@ -20,6 +20,12 @@ docker logs -f feedbackpilgrim
 
 You need no `.env` file, no keys and no database server. The setup URL opens a page that creates the owner account and the first project.
 
+## Feedback Pilgrim Cloud
+
+Do not want to run a server? Feedback Pilgrim Cloud is the hosted edition at `https://app.feedbackpilgrim.com`, with a free trial of 14 days and no credit card. Read the [plans](https://feedbackpilgrim.com/pricing), or [start a trial](https://app.feedbackpilgrim.com/register).
+
+The self-hosted edition stays free under the AGPL-3.0 license. The guide below installs it.
+
 ## Features
 
 - Feedback boards with votes, comments, tags and a public roadmap.
